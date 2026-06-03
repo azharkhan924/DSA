@@ -109,23 +109,19 @@ Store prefix sum only if not already present
 
 class Solution {
     public int longestSubarray(int[] arr, int k) {
-        HashMap<Integer, Integer> map = new HashMap<>();
-
-        int sum = 0, maxLen = 0;
-
-        for (int i = 0; i < arr.length; i++) {
-            sum += arr[i];
-
-            if (sum == k)
-                maxLen = i + 1;
-
-            if (map.containsKey(sum - k))
-                maxLen = Math.max(maxLen, i - map.get(sum - k));
-
-            map.putIfAbsent(sum, i);
+        HashMap<Integer,Integer> m=new HashMap<>();
+        int sum=0,mxlen=0;
+        for(int i=0;i<arr.length;i++){
+            sum+=arr[i];
+            if(sum==k)mxlen=i+1;
+            
+            if(m.containsKey(sum-k)){
+                mxlen=Math.max(mxlen,i-m.get(sum-k));
+            }
+            m.putIfAbsent(sum,i);
         }
-
-        return maxLen;
+        return mxlen;
+        
     }
 }
 
