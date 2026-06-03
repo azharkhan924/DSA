@@ -23,3 +23,52 @@ class Solution {
        reverse(nums,0,nums.length-1);
     }
     }
+
+2.Move Zeros
+
+Input: nums = [0,1,0,3,12]
+Output: [1,3,12,0,0]
+
+Approach: take two pointers zero and digit
+zero-> will look for the first zero
+digit-> will look for the digit after that zero
+
+
+Solution1:
+
+ class Solution {
+    public void moveZeroes(int[] nums) {
+        int digit=0,zero=0;
+        while(zero<nums.length){
+             while(zero<nums.length && nums[zero]!=0)zero++;
+             digit=zero;
+            while(digit<nums.length && nums[digit]==0)digit++;
+           
+            if(digit>=nums.length || zero>=nums.length)break;
+            int t=nums[digit];
+            nums[digit]=nums[zero];
+            nums[zero]=t;
+            
+        }
+    }
+}
+
+Solution2:
+
+class Solution {
+    public void moveZeroes(int[] nums) {
+        int s = 0;
+        int e = 0;
+        while(e < nums.length) {
+            if(nums[e] != 0) {
+                int temp = nums[e];
+                nums[e] = nums[s];
+                nums[s] = temp;
+                s++;
+            }
+            e++;
+        }
+        
+    }
+}
+

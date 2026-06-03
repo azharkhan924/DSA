@@ -1,0 +1,152 @@
+1.Union of two sorted arrays
+
+Input: nums1 = [1, 2, 3, 4, 5], nums2 = [1, 2, 7]
+Output: [1, 2, 3, 4, 5, 7]
+
+Approach1: Use a tree set
+
+class Solution {
+    public int[] unionArray(int[] nums1, int[] nums2) {
+        Set<Integer> s=new TreeSet<>();
+		for(int i:nums1)s.add(i);for(int i:nums2)s.add(i);
+		int ans[]=new int[s.size()];
+		int j=0;
+		for(int i:s)ans[j++]=i;
+        return ans;
+    }
+}
+
+Approach2: Use LinkedHashSet and two pointers for both arrays(just like merge sorted arrays)
+
+class Solution {
+    public int[] unionArray(int[] nums1, int[] nums2) {
+        Set<Integer> s=new LinkedHashSet<>();
+
+        while(i<nums1.length && j<nums2.length){
+        if(nums1[i]>nums2[j])s.add(nums2[j++]);
+        else s.add(nums1[i++]);
+        }
+        while(i<nums1.length)s.add(nums1[i++]);
+        while(j<nums2.length)s.add(nums2[j++]);
+        return s;
+    }
+}
+
+Approach3 : Using ArrayList
+
+import java.util.*;
+
+class Solution {
+    public static ArrayList<Integer> findUnion(int a[], int b[]) {
+        int i = 0, j = 0;
+        ArrayList<Integer> ans = new ArrayList<>();
+
+        while (i < a.length && j < b.length) {
+            int val;
+
+            if (a[i] < b[j])
+                val = a[i++];
+            else if (a[i] > b[j])
+                val = b[j++];
+            else {
+                val = a[i];
+                i++;
+                j++;
+            }
+
+            if (ans.isEmpty() || ans.get(ans.size() - 1) != val)
+                ans.add(val);
+        }
+
+        while (i < a.length) {
+            if (ans.isEmpty() || ans.get(ans.size() - 1) != a[i])
+                ans.add(a[i]);
+            i++;
+        }
+
+        while (j < b.length) {
+            if (ans.isEmpty() || ans.get(ans.size() - 1) != b[j])
+                ans.add(b[j]);
+            j++;
+        }
+
+        return ans;
+    }
+}
+
+
+
+
+
+2. Single Number: Using exor operator
+
+class Solution {
+    public int singleNumber(int[] nums) {
+    int res=0;
+    for(int i=0;i<nums.length;i++){
+        res^=nums[i];
+    }
+    return res;
+    }
+    }
+
+
+3. Longest Subarray with sum k
+Approach: Prefix sum + hashmap
+
+If:
+prefixSum[i]−prefixSum[j]==k
+then the subarray from j+1 to i has sum k.
+Store the first occurrence of every prefix sum in a hashmap.
+
+Traverse array
+Maintain running prefix sum
+If sum == k, update answer
+If (sum - k) exists in hashmap:
+subarray length = i - hashmap[sum-k]
+Store prefix sum only if not already present
+
+
+class Solution {
+    public int longestSubarray(int[] arr, int k) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+
+        int sum = 0, maxLen = 0;
+
+        for (int i = 0; i < arr.length; i++) {
+            sum += arr[i];
+
+            if (sum == k)
+                maxLen = i + 1;
+
+            if (map.containsKey(sum - k))
+                maxLen = Math.max(maxLen, i - map.get(sum - k));
+
+            map.putIfAbsent(sum, i);
+        }
+
+        return maxLen;
+    }
+}
+
+
+If array contains only positive numbers
+class Solution {
+    public int longestSubarray(int[] arr, int k) {
+        int l = 0, sum = 0, maxLen = 0;
+
+        for (int r = 0; r < arr.length; r++) {
+            sum += arr[r];
+
+            while (sum > k) {
+                sum -= arr[l++];
+            }
+
+            if (sum == k) {
+                maxLen = Math.max(maxLen, r - l + 1);
+            }
+        }
+
+        return maxLen;
+    }
+}
