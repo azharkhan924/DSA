@@ -127,6 +127,44 @@ class Solution {
 
 
 If array contains only positive numbers
+
+
+Solution 1:
+
+class Solution {
+    static ArrayList<Integer> subarraySum(int[] arr, int target) {
+        int pref[]=new int[arr.length];
+        pref[0]=arr[0];
+        for(int i=1;i<arr.length;i++){
+            pref[i]+=pref[i-1]+arr[i];
+        }
+        int l=0,r=0,sum=0;
+        ArrayList<Integer> ans=new ArrayList<>();
+        while(l<arr.length && r<arr.length){
+            if(pref[r]==target){
+                ans.add(l+1);
+                ans.add(r+1);
+                return ans;
+            }
+            sum=Math.abs(pref[l]-pref[r]);
+            if(sum<target)r++;
+            else if(sum==target)
+            {
+                ans.add(l+2);
+                ans.add(r+1);
+                return ans;
+            }
+            else l++;
+        }
+        ans.add(-1);
+        return ans;
+        
+    }
+}
+
+
+Solution 2:
+
 class Solution {
     public int longestSubarray(int[] arr, int k) {
         int l = 0, sum = 0, maxLen = 0;
