@@ -17,3 +17,91 @@ class Solution {
         return profit;
     }
 }
+
+Approach 2: if find lesser than buy then make buy equal to it else compare with the max profit 
+
+class Solution {
+    public int maxProfit(int[] prices) {
+        int buy=prices[0],profit=0;
+        for(int i=1;i<prices.length;i++){
+            if(prices[i]<buy)buy=prices[i];
+            else{
+                profit=Math.max(profit,prices[i]-buy);
+            }
+        }
+        return profit;
+    }
+}
+
+
+
+2.Rearrange Array Elements by Sign
+
+Approach 1: Take 2 list store the negative and positives separately then add elements accordingly to final ans
+
+class Solution {
+    public int[] rearrangeArray(int[] nums) {
+        List<Integer> pos=new ArrayList<>();
+        List<Integer> neg=new ArrayList<>();
+        for(int i:nums){
+            if(i>=0)pos.add(i);
+            else neg.add(i);
+        }
+        int p=0,n=0;
+        for(int i=0;i<nums.length;i++){
+            if(i%2==0)nums[i]=pos.get(p++);
+            else nums[i]=neg.get(n++);
+        }
+        return nums;
+
+
+    }
+}
+
+Approach 2: Make a new result array and take 2 pointers for negative and positive indices and insert in result array accordingly
+
+class Solution {
+    public int[] rearrangeArray(int[] nums) {
+        int posIndex=0;
+        int negIndex=1;
+        int result[]=new int[nums.length];
+
+        for(int i=0;i<nums.length;i++){
+            if(nums[i]>0)
+            {
+                result[posIndex]=nums[i];
+                posIndex+=2;
+            }
+            else{
+                result[negIndex]=nums[i];
+                negIndex+=2;
+            }
+        }
+        return result;
+
+
+    }
+}
+
+
+3. Leaders in an array 
+
+class Solution {
+    public List<Integer> leaders(int[] nums) {
+        List<Integer> ans=new ArrayList<>();
+
+        int mx=nums[nums.length -1];
+
+        ans.add(mx);
+
+        for(int i=nums.length -2; i>= 0;i--) {
+            if (nums[i]>= mx) {
+                mx =nums[i];
+                ans.add(nums[i]);
+            }
+        }
+
+        Collections.reverse(ans);
+        return ans;
+    }
+}
