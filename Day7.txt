@@ -1,0 +1,39 @@
+1. Longest Consecutive Sequence
+
+Approach 1: Sort the array and look for consecutive numbers
+
+class Solution {
+    public int longestConsecutive(int[] nums) {
+        if(nums.length==1)return 1;
+    Arrays.sort(nums);
+    int max=0;
+    int seq=1;
+    for(int i=0;i<nums.length-1;i++){
+        if(nums[i]+1==nums[i+1])seq++;
+        else if(nums[i]!=nums[i+1]) seq=1;
+        if(max<seq)max=seq;
+    }
+    return max;
+    }
+}
+
+Approach 2: Use Set check if num-1 exist or not 
+if not exist then look for the all increasing values
+
+class Solution {
+    public int longestConsecutive(int[] nums) {
+       Set<Integer> s=new LinkedHashSet<>();
+       for(int i:nums)s.add(i);
+       int mx=0;
+       
+       for(int i:s){
+        int num=i;
+        int seq=1;
+        if(!s.contains(num-1)){
+            while(s.contains(++num))seq++;
+            mx=Math.max(mx,seq);
+        }
+       }
+       return mx;
+    }
+}
