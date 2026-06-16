@@ -109,3 +109,39 @@ class Solution {
     }
     
 }
+
+
+
+3. Rotate Image
+
+You are given an n x n 2D matrix representing an image, rotate the image by 90 degrees (clockwise).
+
+Approach : first transpose then reverse each row
+
+class Solution {
+    private void reverse(int []arr){
+        int i=0;
+        int j=arr.length-1;
+        while(j>i){
+            int t=arr[i];
+            arr[i]=arr[j];
+            arr[j]=t;
+            i++;j--;
+        }
+    }
+    public void rotate(int[][] matrix) {
+     int i,j;
+     int n=matrix.length;
+     for(i=0;i<n;i++){
+        for(j=i+1;j<n;j++){
+            int t=matrix[i][j];
+            matrix[i][j]=matrix[j][i];
+            matrix[j][i]=t;
+        }
+     }
+     for(i=0;i<n;i++){
+        reverse(matrix[i]);
+     }
+        
+    }
+}
