@@ -37,3 +37,75 @@ class Solution {
        return mx;
     }
 }
+
+2. Set Matrix Zeroes
+Given an m x n integer matrix matrix, if an element is 0, set its entire row and column to 0's.
+
+Approach 1: Take two arrays for row and column mark the respective row and column as -1 in which zero is present then make that row column zero
+
+class Solution {
+    public void setZeroes(int[][] matrix) {
+       int m=matrix.length;
+       int n=matrix[0].length;
+       int row[]=new int[n];
+       int col[]=new int[m];
+       for(int i=0;i<m;i++){
+        for(int j=0;j<n;j++){
+            if(matrix[i][j]==0){
+                row[j]=-1;
+                col[i]=-1;
+            }
+        }
+    }
+       for(int i=0;i<n;i++){
+        if(row[i]==-1){
+            for(int j=0;j<m;j++){
+                matrix[j][i]=0;
+            }
+        }
+    }
+
+       for(int i=0;i<m;i++){
+        if(col[i]==-1){
+            for(int j=0;j<n;j++){
+                matrix[i][j]=0;
+            }
+        }
+    }
+
+    }
+}
+
+
+Solution 2 using function:
+
+class Solution {
+    public void rowZ(int matrix[][],int rowN){
+        for(int i=0;i<matrix[0].length;i++){
+                matrix[rowN][i]=0;
+        }
+    }
+     public void colZ(int matrix[][],int colN){
+        for(int i=0;i<matrix.length;i++){
+                matrix[i][colN]=0;
+        }
+    }
+    public void setZeroes(int[][] matrix) {
+       int m=matrix.length;//3
+       int n=matrix[0].length;//4
+       int row[]=new int[n];
+       int col[]=new int[m];
+       for(int i=0;i<m;i++){
+        for(int j=0;j<n;j++){
+            if(matrix[i][j]==0){
+                row[j]=-1;
+                col[i]=-1;
+            }
+        }
+       }
+       for(int i=0;i<col.length;i++)if(col[i]==-1)rowZ(matrix,i);
+       for(int i=0;i<row.length;i++)if(row[i]==-1)colZ(matrix,i);
+      
+    }
+    
+}
