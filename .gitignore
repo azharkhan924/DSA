@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Compiled
+*.class
+*.jar
+*.war
+
+# Old text files (kept for reference, but .md versions are the formatted notes)

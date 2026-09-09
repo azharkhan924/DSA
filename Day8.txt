@@ -1,0 +1,31 @@
+1. Spiral Matrix
+
+Input: matrix = [[1,2,3],[4,5,6],[7,8,9]]
+Output: [1,2,3,6,9,8,7,4,5]
+
+Approach: take four pointers and traverse accordingly
+
+
+class Solution {
+    public List<Integer> spiralOrder(int[][] matrix) {
+        int m=matrix.length-1,n=matrix[0].length-1;
+        int a=0,b=n;
+        int c=m,d=0;
+        List ans=new ArrayList();
+
+        while(a<=c && b>=d){
+            for(int i=a;i<=b;i++)ans.add(matrix[a][i]);
+            a++;
+            for(int i=a;i<=c;i++)ans.add(matrix[i][b]);
+            b--;
+            if(a<=c && b>=d){
+            for(int i=b;i>=d;i--)ans.add(matrix[c][i]);
+            c--;
+            for(int i=c;i>=a;i--)ans.add(matrix[i][d]);
+            d++;
+            }
+        }
+        return ans;
+       
+    }
+}   
