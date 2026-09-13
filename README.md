@@ -16,6 +16,7 @@ A structured, day-wise collection of Data Structures & Algorithms notes focused 
 | **Day 6** | Best Time to Buy & Sell Stock · Rearrange Array by Sign · Leaders in an Array | [Day6.md](Day6.md) |
 | **Day 7** | Longest Consecutive Sequence · Set Matrix Zeroes · Rotate Image | [Day7.md](Day7.md) |
 | **Day 8** | Spiral Matrix | [Day8.md](Day8.md) |
+| **Day 9** | Subarray Sum Equals K | [Day9.md](Day9.md) |
 
 ---
 

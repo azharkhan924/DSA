@@ -1,0 +1,87 @@
+Subarray Sum Equals K:
+
+Given an array of integers nums and an integer k, return the total number of subarrays whose sum equals to k.
+A subarray is a contiguous non-empty sequence of elements within an array.
+
+Example 1:
+Input: nums = [1,1,1], k = 2
+Output: 2
+
+Example 2:
+Input: nums = [1,2,3], k = 3
+Output: 2
+
+--------------------------------------------------
+Approach 1: Brute Force (O(n^2))
+--------------------------------------------------
+public int subarraySumBruteForce(int[] nums, int k) {
+    int count = 0;
+    for (int i = 0; i < nums.length; i++) {
+        int sum = 0;
+        for (int j = i; j < nums.length; j++) {
+            sum += nums[j];
+            if (sum == k) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+--------------------------------------------------
+Approach 2: Prefix Sum + HashMap (O(n))
+--------------------------------------------------
+Explanation & Intuition:
+
+eg: 
+arr[] = {1, 2, 3, -3, 1, 1, 1, 4, 2, -3}, k = 3
+         |        |
+          --------
+
+total = x = 1 + 2 + 3 + (-3) + 1 = 4
+total agr x hai 
+ to agr ek part 'k' hai
+ to bacha hua part x-k hoga (4 - 3 = 1)
+ 
+Agar pehle kahi sum = (x - k) mil chuka hai,
+to us point se abhi tak ke elements ka sum 'k' hi hoga!
+
+Variables:
+1. prefixSum: running prefix sum store karega
+2. count: total subarrays count karega
+3. prefixSumCount: HashMap jisme (prefixSum -> frequency) store karenge
+   - Note: Day 3 me index store kiya tha (longest length ke liye).
+   - Yaha frequency store karenge (sare valid subarrays count karne ke liye).
+
+Base Case:
+prefixSumCount.put(0, 1);
+-> Agar prefixSum == k ho jaye, to (prefixSum - k) = 0 hota hai.
+-> 0 ka count 1 hone se starting index 0 se banne wale subarrays directly count ho jate hain.
+
+
+public int subarraySum(int[] arr, int k) {
+    int n = arr.length;
+    HashMap<Integer, Integer> prefixSumCount = new HashMap<>();
+
+    int prefixSum = 0;
+    int count = 0;
+
+    // Base case: empty prefix has sum 0
+    prefixSumCount.put(0, 1);
+
+    for (int i = 0; i < n; i++) {
+        prefixSum += arr[i];
+
+        int remove = prefixSum - k;
+
+        // Agar (prefixSum - k) pehle dekha hai, to uski sari occurrences count me add karo
+        if (prefixSumCount.containsKey(remove)) {
+            count += prefixSumCount.get(remove);
+        }
+
+        // Har iteration me current prefixSum ki frequency map me update karo
+        prefixSumCount.put(prefixSum, prefixSumCount.getOrDefault(prefixSum, 0) + 1);
+    }
+
+    return count;
+}
