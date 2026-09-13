@@ -1,0 +1,92 @@
+Pascal's Triangle
+
+1
+1 1
+1 2 1
+1 3 3 1
+1 4 6 4 1
+
+3 Different problems based on Pascal's Triangle:
+
+1. Variation 1: Given Row (R) & Column (C), find the element at (R, C).
+2. Variation 2: Print the given N-th row of Pascal's Triangle.
+3. Variation 3: Print / Generate the entire Pascal's Triangle up to numRows.
+
+--------------------------------------------------
+Variation 1: Given R & C, find the element
+--------------------------------------------------
+Suppose we have to find 3rd row 2nd element which is 2.
+R = 3, C = 2
+
+Formula:
+Element = (R - 1) C (C - 1)  [Combination: nCr formula]
+nCr(R - 1, C - 1) = nCr(2, 1) = 2! / (1! * 1!) = 2
+
+To calculate nCr in O(r) time without factorial overflow:
+public long nCr(int n, int r) {
+    long res = 1;
+    for (int i = 0; i < r; i++) {
+        res = res * (n - i);
+        res = res / (i + 1);
+    }
+    return res;
+}
+
+--------------------------------------------------
+Variation 2: Print N-th row of Pascal's Triangle
+--------------------------------------------------
+Brute Force: Call nCr for every column from 1 to n -> O(n * r) ~ O(n^2).
+
+Optimal Observation (e.g. 5th row: 1 4 6 4 1):
+1st element: 1
+2nd element: 4 = 4 / 1
+3rd element: 6 = (4 * 3) / (1 * 2)
+4th element: 4 = (4 * 3 * 2) / (1 * 2 * 3)
+5th element: 1 = (4 * 3 * 2 * 1) / (1 * 2 * 3 * 4)
+
+Formula for next element from current:
+nextElement = currentElement * (row - col) / col
+
+Java Implementation (O(n) time, O(1) extra space):
+public List<Integer> nthRow(int n) {
+    List<Integer> row = new ArrayList<>();
+    long ans = 1;
+    row.add((int) ans);
+
+    for (int i = 1; i < n; i++) {
+        ans = ans * (n - i);
+        ans = ans / i;
+        row.add((int) ans);
+    }
+    return row;
+}
+
+--------------------------------------------------
+Variation 3: Print the whole Pascal's Triangle (numRows)
+--------------------------------------------------
+Approach 1: Brute Force (Calculate nCr for every element) -> O(n^3) time.
+
+Approach 2: Use nthRow in O(n) for each row -> O(n^2) time (Optimal ✨).
+
+class Solution {
+    public List<Integer> nthRow(int n) {
+        List<Integer> row = new ArrayList<>();
+        long ans = 1;
+        row.add((int) ans);
+
+        for (int i = 1; i < n; i++) {
+            ans = ans * (n - i);
+            ans = ans / i;
+            row.add((int) ans);
+        }
+        return row;
+    }
+
+    public List<List<Integer>> generate(int numRows) {
+        List<List<Integer>> ans = new ArrayList<>();
+        for (int i = 1; i <= numRows; i++) {
+            ans.add(nthRow(i));
+        }
+        return ans;
+    }
+}
