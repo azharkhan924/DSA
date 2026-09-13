@@ -10,7 +10,7 @@ A structured, comprehensive collection of Data Structures & Algorithms notes foc
 |:---|:---|:---:|:---:|
 | 🟢 **Arrays — Easy** | 14 Problems (Largest, 2nd Largest, Sorted Check, Remove Duplicates, Rotations, Move Zeros, Linear Search, Union, Missing Number, Max Consecutive Ones, Single Number, Longest Subarray Sum K) | 14 / 14 ✅ | [Arrays_Easy.md](Arrays_Easy.md) |
 | 🟡 **Arrays — Medium** | 14 Problems (Two Sum, Sort Colors / DNF, Majority Element, Kadane's, Print Max Subarray, Stock Buy & Sell, Rearrange by Sign, Next Permutation, Leaders, Longest Consecutive Sequence, Set Matrix Zeroes, Rotate 90°, Spiral Matrix, Subarray Sum Equals K) | 14 / 14 ✅ | [Arrays_Medium.md](Arrays_Medium.md) |
-| 🔴 **Arrays — Hard** | Pascal's Triangle (3 Variations), Majority Element II, 3 Sum, 4 Sum, Largest Subarray 0 Sum, Subarrays with XOR K, Merge Intervals, Merge Sorted Arrays, Repeating & Missing, Inversions, Reverse Pairs, Max Product Subarray | In Progress 🚀 | [Arrays_Hard.md](Arrays_Hard.md) |
+| 🔴 **Arrays — Hard** | Pascal's Triangle (3 Variations), Majority Element II, 3 Sum, 4 Sum, Largest Subarray 0 Sum, Subarrays with XOR K, Merge Intervals, Merge Sorted Arrays, Repeating & Missing, Inversions, Reverse Pairs, Max Product Subarray | 2 / 12 In Progress 🚀 | [Arrays_Hard.md](Arrays_Hard.md) |
 
 ---
 
@@ -30,7 +30,7 @@ A structured, comprehensive collection of Data Structures & Algorithms notes foc
 | **Day 7** | Longest Consecutive Sequence · Set Matrix Zeroes · Rotate Image | [Day7.md](Day7.md) |
 | **Day 8** | Spiral Matrix | [Day8.md](Day8.md) |
 | **Day 9** | Subarray Sum Equals K (Prefix Sum + Frequency Map) | [Day9.md](Day9.md) |
-| **Day 10** | Pascal's Triangle (3 Variations: Element at R,C · N-th Row · Full Triangle) | [Day10.md](Day10.md) |
+| **Day 10** | Pascal's Triangle (3 Variations) · Majority Element II | [Day10.md](Day10.md) |
 
 </details>
 

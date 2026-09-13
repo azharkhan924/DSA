@@ -90,3 +90,104 @@ class Solution {
         return ans;
     }
 }
+
+==================================================
+Majority Element II (LeetCode 229)
+==================================================
+Given an integer array of size n, find all elements that appear more than ⌊n / 3⌋ times.
+
+Note: At most 2 elements can appear more than ⌊n / 3⌋ times (because 3 * (n/3 + 1) > n).
+Answer size will always be between 0 and 2.
+
+--------------------------------------------------
+Approach 1: Brute Force (O(n^2) time, O(1) space)
+--------------------------------------------------
+class Solution {
+    public List<Integer> majorityElement(int[] nums) {
+        List<Integer> ans = new ArrayList<>();
+        int n = nums.length;
+
+        for (int i = 0; i < n; i++) {
+            // Avoid recounting if already added
+            if (ans.size() != 0 && nums[i] == ans.get(0)) continue;
+
+            int count = 0;
+            for (int j = 0; j < n; j++) {
+                if (nums[i] == nums[j]) count++;
+            }
+
+            if (count > n / 3) ans.add(nums[i]);
+            if (ans.size() == 2) break; // at most 2 majority elements
+        }
+        return ans;
+    }
+}
+
+--------------------------------------------------
+Approach 2: Use HashMap (O(n) time, O(n) space)
+--------------------------------------------------
+class Solution {
+    public List<Integer> majorityElement(int[] nums) {
+        List<Integer> ans = new ArrayList<>();
+        Map<Integer, Integer> mpp = new HashMap<>();
+        int n = nums.length;
+
+        for (int num : nums) {
+            mpp.put(num, mpp.getOrDefault(num, 0) + 1);
+        }
+
+        for (int key : mpp.keySet()) {
+            if (mpp.get(key) > n / 3) {
+                ans.add(key);
+            }
+        }
+        return ans;
+    }
+}
+
+--------------------------------------------------
+Approach 3: Extended Boyer-Moore Voting (Optimal ✨ O(n) time, O(1) space)
+--------------------------------------------------
+Intuition: Maintain 2 candidates and 2 counters.
+Triplets of 3 distinct elements cancel each other out!
+
+class Solution {
+    public List<Integer> majorityElement(int[] nums) {
+        int count1 = 0, count2 = 0;
+        int el1 = Integer.MIN_VALUE, el2 = Integer.MIN_VALUE;
+
+        // Phase 1: Find 2 potential candidates
+        for (int i = 0; i < nums.length; i++) {
+            if (count1 == 0 && nums[i] != el2) {
+                el1 = nums[i];
+                count1 = 1;
+            } else if (count2 == 0 && nums[i] != el1) {
+                el2 = nums[i];
+                count2 = 1;
+            } else if (nums[i] == el1) {
+                count1++;
+            } else if (nums[i] == el2) {
+                count2++;
+            } else {
+                count1--;
+                count2--;
+            }
+        }
+
+        // Phase 2: Verification Pass (Count actual occurrences)
+        count1 = 0;
+        count2 = 0;
+        for (int num : nums) {
+            if (num == el1) count1++;
+            else if (num == el2) count2++;
+        }
+
+        // Phase 3: Check against threshold > n / 3
+        List<Integer> result = new ArrayList<>();
+        int threshold = nums.length / 3;
+        if (count1 > threshold) result.add(el1);
+        if (count2 > threshold) result.add(el2);
+
+        return result;
+    }
+}

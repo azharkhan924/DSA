@@ -9,7 +9,7 @@ A comprehensive, organized guide to **Hard Array Problems** from the DSA Sheet, 
 | # | Problem | Status | Core Pattern |
 |:---:|:---|:---:|:---|
 | 1 | [Pascal's Triangle (All 3 Variations)](#1-pascals-triangle-leetcode-118) | ✅ Complete | Combinatorics / Row Multiplier |
-| 2 | Majority Element II (> ⌊n/3⌋) | 📌 Track | Extended Boyer-Moore Voting (2 Candidates) |
+| 2 | [Majority Element II (> ⌊n/3⌋)](#2-majority-element-ii-n3-times) | ✅ Complete | Extended Boyer-Moore Voting (2 Candidates) |
 | 3 | 3 Sum | 📌 Track | Sorting + Two Pointers |
 | 4 | 4 Sum | 📌 Track | Sorting + Two Pointers (2 Fixed Pointers) |
 | 5 | Largest Subarray with 0 Sum | 📌 Track | Prefix Sum + First-Occurrence HashMap |
@@ -95,17 +95,6 @@ Input:  n = 5
 Output: [1, 4, 6, 4, 1]
 ```
 
-#### Naive Approach ($O(n^2)$ time):
-Calculate `nCr(n - 1, c - 1)` for each column from $1$ to $n$.
-
-#### Optimal Observation ($O(n)$ time ✨):
-Look closely at row $n = 5$:
-- Col 1: $1$
-- Col 2: $\frac{4}{1} = 4 = \text{Col } 1 \times \frac{5 - 1}{1}$
-- Col 3: $\frac{4 \times 3}{1 \times 2} = 6 = \text{Col } 2 \times \frac{5 - 2}{2}$
-- Col 4: $\frac{4 \times 3 \times 2}{1 \times 2 \times 3} = 4 = \text{Col } 3 \times \frac{5 - 3}{3}$
-- Col 5: $\frac{4 \times 3 \times 2 \times 1}{1 \times 2 \times 3 \times 4} = 1 = \text{Col } 4 \times \frac{5 - 4}{4}$
-
 #### Transition Formula:
 $$\text{nextElement} = \text{currentElement} \times \frac{n - i}{i} \quad (i = 1, 2, \dots, n-1)$$
 
@@ -149,16 +138,11 @@ Output: [[1],
          [1, 4, 6, 4, 1]]
 ```
 
-#### Approach: Row-by-Row Generation (Optimal ✨)
-
-For every row $r$ from $1$ to `numRows`, generate that row in $O(r)$ using the formula from Variation 2, and add it to our final list.
-
 ```java
 import java.util.ArrayList;
 import java.util.List;
 
 class Solution {
-    // Helper to generate a single row in O(row) time
     private List<Integer> generateRow(int row) {
         List<Integer> ansRow = new ArrayList<>();
         long ans = 1;
@@ -190,21 +174,193 @@ class Solution {
 
 ---
 
-### 💡 Extra Tips & Interview Facts
+## 2. Majority Element II (> ⌊n/3⌋ times)
 
-> 1. **Index Clarification:** Always confirm with the interviewer if $R$ and $C$ are **0-indexed** or **1-indexed**:
->    - 1-indexed: ${}^{R-1}C_{C-1}$
->    - 0-indexed: ${}^{R}C_{C}$
-> 2. **Symmetry:** Each row is palindromic: ${}^{n}C_{r} = {}^{n}C_{n-r}$.
-> 3. **Row Sum Property:** The sum of all elements in the $n$-th row (1-indexed) is $2^{n-1}$.
-> 4. **DP Alternative:** In dynamic programming, `triangle[i][j] = triangle[i - 1][j - 1] + triangle[i - 1][j]`. The combinatorics approach used above is faster and requires no parent-row lookups.
+**Problem:** Given an integer array `nums` of size `n`, find all elements that appear more than `⌊n / 3⌋` times. (LeetCode 229)
+
+```
+Example 1:
+Input:  nums = [3, 2, 3]
+Output: [3]
+
+Example 2:
+Input:  nums = [1, 2]
+Output: [1, 2]
+
+Example 3:
+Input:  nums = [1]
+Output: [1]
+```
 
 ---
 
-## 📝 Summary: Pascal's Triangle Variations
+### 🧠 Mathematical Deduction:
+- How many elements can strictly exceed $\lfloor n / 3 \rfloor$ occurrences?
+- Suppose 3 elements could appear $> \lfloor n / 3 \rfloor$ times. Their combined count would be:
+  $$\ge 3 \times \left(\left\lfloor \frac{n}{3} \right\rfloor + 1\right) > n$$
+  This would exceed the size of the array, which is impossible!
+- **Conclusion:** There can be at most **2 majority elements** (the result list contains 0, 1, or 2 numbers).
 
-| Variation | Question | Best Approach | Time | Space |
-|---|---|---|---|---|
-| **Var 1** | Value at $(R, C)$ | $nCr(R-1, C-1)$ without factorials | O(C) | O(1) |
-| **Var 2** | Entire $N$-th Row | Multiply & divide: `ans * (n - i) / i` | O(N) | O(1) |
-| **Var 3** | Full Triangle (`numRows`) | Generate each row via Var 2 helper | O(N²) | O(1) extra |
+---
+
+### Comparison: Majority Element I vs Majority Element II
+
+| Feature | Majority Element I (Medium) | Majority Element II (Hard) |
+|---|---|---|
+| **Threshold** | $> \lfloor n / 2 \rfloor$ | $> \lfloor n / 3 \rfloor$ |
+| **Max Possible Answers** | Exactly 1 | At most 2 (0, 1, or 2) |
+| **Candidates Tracked** | 1 candidate (`el`, `count`) | 2 candidates (`el1`, `el2`, `count1`, `count2`) |
+| **Cancellation Group** | Pairs of 2 distinct elements | Triplets of 3 distinct elements |
+| **Verification Pass** | Optional (if answer guaranteed) | **Mandatory** (answers may not exist) |
+
+---
+
+### Approach 1: Brute Force
+
+For each element, count its occurrences across the entire array.
+
+```java
+class Solution {
+    public List<Integer> majorityElement(int[] nums) {
+        List<Integer> ans = new ArrayList<>();
+        int n = nums.length;
+
+        for (int i = 0; i < n; i++) {
+            if (ans.size() != 0 && nums[i] == ans.get(0)) continue;
+
+            int count = 0;
+            for (int j = 0; j < n; j++) {
+                if (nums[i] == nums[j]) count++;
+            }
+
+            if (count > n / 3) ans.add(nums[i]);
+            if (ans.size() == 2) break;
+        }
+        return ans;
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | O(n²) |
+| **Space** | O(1) |
+
+---
+
+### Approach 2: HashMap Frequency Count
+
+Count occurrences using a hash map and collect all keys with frequency $> \lfloor n / 3 \rfloor$.
+
+```java
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+class Solution {
+    public List<Integer> majorityElement(int[] nums) {
+        List<Integer> ans = new ArrayList<>();
+        Map<Integer, Integer> map = new HashMap<>();
+        int n = nums.length;
+
+        for (int num : nums) {
+            map.put(num, map.getOrDefault(num, 0) + 1);
+        }
+
+        for (int key : map.keySet()) {
+            if (map.get(key) > n / 3) {
+                ans.add(key);
+            }
+        }
+        return ans;
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | O(n) |
+| **Space** | O(n) |
+
+---
+
+### Approach 3: Extended Boyer-Moore Voting Algorithm (Optimal ✨)
+
+#### Core Intuition (Triplet Cancellation):
+Just as we canceled different pairs in Majority Element I, here we cancel **triplets** of 3 distinct elements. If an element appears $> n/3$ times, it cannot be completely eliminated by other elements.
+
+#### Step-by-Step Execution:
+1. **Candidate Phase:**
+   - Maintain `el1`, `el2` initialized to `Integer.MIN_VALUE` and counts `count1 = 0`, `count2 = 0`.
+   - If `count1 == 0` and current element `!= el2`: set `el1 = nums[i]`, `count1 = 1`.
+   - Else if `count2 == 0` and current element `!= el1`: set `el2 = nums[i]`, `count2 = 1`.
+   - Else if current element `== el1`: `count1++`.
+   - Else if current element `== el2`: `count2++`.
+   - Else (current element is different from both): cancel one from each candidate → `count1--`, `count2--`.
+2. **Verification Phase:**
+   - Reset `count1 = 0, count2 = 0`.
+   - Traverse the array once more and count actual occurrences of `el1` and `el2`.
+   - If `count1 > n / 3`: add `el1` to result.
+   - If `count2 > n / 3`: add `el2` to result.
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    public List<Integer> majorityElement(int[] nums) {
+        int count1 = 0, count2 = 0;
+        int el1 = Integer.MIN_VALUE, el2 = Integer.MIN_VALUE;
+
+        // Phase 1: Find potential candidates
+        for (int i = 0; i < nums.length; i++) {
+            if (count1 == 0 && nums[i] != el2) {
+                el1 = nums[i];
+                count1 = 1;
+            } else if (count2 == 0 && nums[i] != el1) {
+                el2 = nums[i];
+                count2 = 1;
+            } else if (nums[i] == el1) {
+                count1++;
+            } else if (nums[i] == el2) {
+                count2++;
+            } else {
+                count1--;
+                count2--;
+            }
+        }
+
+        // Phase 2: Verification Pass
+        count1 = 0;
+        count2 = 0;
+        for (int num : nums) {
+            if (num == el1) count1++;
+            else if (num == el2) count2++;
+        }
+
+        // Phase 3: Threshold Check (> n / 3)
+        List<Integer> result = new ArrayList<>();
+        int threshold = nums.length / 3;
+
+        if (count1 > threshold) result.add(el1);
+        if (count2 > threshold) result.add(el2);
+
+        return result;
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | O(n) — exactly two linear passes |
+| **Space** | O(1) ✨ — in-place constant variables |
+
+---
+
+## 📝 Hard Track Summary
+
+| # | Problem | Core Pattern | Time | Space |
+|---|---------|--------------|------|-------|
+| 1 | Pascal's Triangle (3 Variations) | Combinatorics / Row Multiplier | O(N²) | O(1) extra |
+| 2 | Majority Element II (> ⌊n/3⌋) | Extended Boyer-Moore (2 Candidates) | O(n) | O(1) |
