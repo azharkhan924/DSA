@@ -1,3 +1,4 @@
+
 Pascal's Triangle
 
 1
@@ -6,188 +7,184 @@ Pascal's Triangle
 1 3 3 1
 1 4 6 4 1
 
-3 Different problems based on Pascal's Triangle:
+3 Different problems based on it.
 
-1. Variation 1: Given Row (R) & Column (C), find the element at (R, C).
-2. Variation 2: Print the given N-th row of Pascal's Triangle.
-3. Variation 3: Print / Generate the entire Pascal's Triangle up to numRows.
+1. Given R & C find the element.
 
---------------------------------------------------
-Variation 1: Given R & C, find the element
---------------------------------------------------
-Suppose we have to find 3rd row 2nd element which is 2.
-R = 3, C = 2
+2. Print the given row N of Pascal's Triangle.
 
-Formula:
-Element = (R - 1) C (C - 1)  [Combination: nCr formula]
-nCr(R - 1, C - 1) = nCr(2, 1) = 2! / (1! * 1!) = 2
+3 Print the whole Pascal's Triangle.
 
-To calculate nCr in O(r) time without factorial overflow:
-public long nCr(int n, int r) {
-    long res = 1;
-    for (int i = 0; i < r; i++) {
-        res = res * (n - i);
-        res = res / (i + 1);
-    }
-    return res;
+1.
+Suppose we have to find 3rd row 2nd element which is 2
+
+R=3  C=2
+then by formula
+
+nCr(R-1,C-1) = nCr(2,1) = 2
+
+2. to find nth row if we use formula inside loop then time complexity will be O(n^2)
+
+Lets observe 5th row : 1 4 6 4 1
+
+1st element : 1 
+2nd element : 4 ==> 4/1
+3rd element : 6 ==> 4*3/1*2
+4th element : 4 ==> 4*2*3/1*2*3
+5th element : 1 ==> 4*1*3*2/1*2*3*4
+
+its following 
+ans*(row-col)/col
+
+we can implement this to print nth row
+
+ans =1
+print(ans)
+for(i=1;i<n;i++){
+    ans=ans*(n-1)
+    ans=ans/i   
+    print(ans)
 }
 
---------------------------------------------------
-Variation 2: Print N-th row of Pascal's Triangle
---------------------------------------------------
-Brute Force: Call nCr for every column from 1 to n -> O(n * r) ~ O(n^2).
 
-Optimal Observation (e.g. 5th row: 1 4 6 4 1):
-1st element: 1
-2nd element: 4 = 4 / 1
-3rd element: 6 = (4 * 3) / (1 * 2)
-4th element: 4 = (4 * 3 * 2) / (1 * 2 * 3)
-5th element: 1 = (4 * 3 * 2 * 1) / (1 * 2 * 3 * 4)
 
-Formula for next element from current:
-nextElement = currentElement * (row - col) / col
+ 
+3. Use brute force to print the whole triangle time complexity is O(n^3).
 
-Java Implementation (O(n) time, O(1) extra space):
-public List<Integer> nthRow(int n) {
-    List<Integer> row = new ArrayList<>();
-    long ans = 1;
-    row.add((int) ans);
-
-    for (int i = 1; i < n; i++) {
-        ans = ans * (n - i);
-        ans = ans / i;
-        row.add((int) ans);
+class Solution { 
+    public int fact(int n){
+        int res=1;
+        for(int i=2;i<=n;i++){
+            res*=i;
+        }
+        return res;
     }
-    return row;
+    public int nCr(int n ,int r){
+
+        return fact(n)/(fact(n-r)*fact(r));
+       
+
+    }
+    public List<List<Integer>> generate(int numRows) {
+        List<List<Integer>> ans=new ArrayList<>();
+         for(int i=1;i<=numRows;i++){
+            List<Integer> temp=new ArrayList<>();
+            for(int j=1;j<=i;j++){
+                temp.add(nCr(i-1,j-1));
+            }
+            ans.add(temp);
+
+        }
+        return ans;
+    }
 }
 
---------------------------------------------------
-Variation 3: Print the whole Pascal's Triangle (numRows)
---------------------------------------------------
-Approach 1: Brute Force (Calculate nCr for every element) -> O(n^3) time.
-
-Approach 2: Use nthRow in O(n) for each row -> O(n^2) time (Optimal ✨).
+Approach 2: use ans=ans*(n-1)/i formula to print nth row in O(n) and then use it to print whole triangle
 
 class Solution {
-    public List<Integer> nthRow(int n) {
-        List<Integer> row = new ArrayList<>();
-        long ans = 1;
-        row.add((int) ans);
-
-        for (int i = 1; i < n; i++) {
-            ans = ans * (n - i);
-            ans = ans / i;
-            row.add((int) ans);
+    public List<Integer> nthRow(int n){
+        List<Integer> l=new ArrayList<>();
+        int ans=1;
+        l.add(ans);
+        for(int i=1;i<n;i++){
+            ans=ans*(n-i)/i;
+            l.add(ans);
         }
-        return row;
+        return l;
     }
-
     public List<List<Integer>> generate(int numRows) {
-        List<List<Integer>> ans = new ArrayList<>();
-        for (int i = 1; i <= numRows; i++) {
+        List<List<Integer>> ans=new ArrayList<>();
+         for(int i=1;i<=numRows;i++){
             ans.add(nthRow(i));
         }
         return ans;
     }
 }
 
-==================================================
-Majority Element II (LeetCode 229)
-==================================================
+
+
+Majority Element II
 Given an integer array of size n, find all elements that appear more than ⌊n / 3⌋ times.
 
-Note: At most 2 elements can appear more than ⌊n / 3⌋ times (because 3 * (n/3 + 1) > n).
-Answer size will always be between 0 and 2.
+ans can be from 0 to 2
 
---------------------------------------------------
-Approach 1: Brute Force (O(n^2) time, O(1) space)
---------------------------------------------------
+Approach1: Brute force
+
 class Solution {
     public List<Integer> majorityElement(int[] nums) {
-        List<Integer> ans = new ArrayList<>();
-        int n = nums.length;
+        List<Integer> ans=new ArrayList<>();
 
-        for (int i = 0; i < n; i++) {
-            // Avoid recounting if already added
-            if (ans.size() != 0 && nums[i] == ans.get(0)) continue;
-
-            int count = 0;
-            for (int j = 0; j < n; j++) {
-                if (nums[i] == nums[j]) count++;
+        for(int i=0;i<nums.length;i++){
+            int count=0;
+            if(ans.size()!=0 && nums[i]==ans.get(0))continue;
+            for(int j=0;j<nums.length;j++){
+                if(nums[i]==nums[j])count++;
             }
-
-            if (count > n / 3) ans.add(nums[i]);
-            if (ans.size() == 2) break; // at most 2 majority elements
+            if(count>nums.length/3)ans.add(nums[i]);
+            if(ans.size()==2)break;
         }
         return ans;
     }
 }
 
---------------------------------------------------
-Approach 2: Use HashMap (O(n) time, O(n) space)
---------------------------------------------------
+Approach 2 : Use HashMap
 class Solution {
     public List<Integer> majorityElement(int[] nums) {
-        List<Integer> ans = new ArrayList<>();
-        Map<Integer, Integer> mpp = new HashMap<>();
-        int n = nums.length;
 
-        for (int num : nums) {
-            mpp.put(num, mpp.getOrDefault(num, 0) + 1);
-        }
+        List<Integer> ans= new ArrayList<>();
+       HashMap<Integer,Integer> mpp=new HashMap<>();
 
-        for (int key : mpp.keySet()) {
-            if (mpp.get(key) > n / 3) {
-                ans.add(key);
-            }
-        }
-        return ans;
-    }
+       for(int i=0;i<nums.length;i++)mpp.put(nums[i],mpp.getOrDefault(nums[i],0)+1);
+
+       for(int i:nums)if(mpp.get(i)>nums.length/3)
+       {
+        if(ans.size()!=0 && ans.get(0)==i)continue;
+        ans.add(i);
+       }
+
+       return ans;
+}
 }
 
---------------------------------------------------
-Approach 3: Extended Boyer-Moore Voting (Optimal ✨ O(n) time, O(1) space)
---------------------------------------------------
-Intuition: Maintain 2 candidates and 2 counters.
-Triplets of 3 distinct elements cancel each other out!
+
+
+
+Approach 3: Optimal Solution
 
 class Solution {
     public List<Integer> majorityElement(int[] nums) {
-        int count1 = 0, count2 = 0;
-        int el1 = Integer.MIN_VALUE, el2 = Integer.MIN_VALUE;
+        int count1=0,count2=0,el1=0,el2=0;
 
-        // Phase 1: Find 2 potential candidates
-        for (int i = 0; i < nums.length; i++) {
-            if (count1 == 0 && nums[i] != el2) {
-                el1 = nums[i];
-                count1 = 1;
-            } else if (count2 == 0 && nums[i] != el1) {
-                el2 = nums[i];
-                count2 = 1;
-            } else if (nums[i] == el1) {
+        for(int i=0;i<nums.length;i++){
+            if(count1==0 && el2!=nums[i])
+            {
+                el1=nums[i];
                 count1++;
-            } else if (nums[i] == el2) {
+            }
+            else if(count2==0 && el1!=nums[i])
+            {
+                el2=nums[i];
                 count2++;
-            } else {
+            }
+
+            else if(nums[i]==el1)count1++;
+            else if(nums[i]==el2)count2++;
+
+            else {
                 count1--;
                 count2--;
             }
         }
-
-        // Phase 2: Verification Pass (Count actual occurrences)
         count1 = 0;
         count2 = 0;
         for (int num : nums) {
             if (num == el1) count1++;
             else if (num == el2) count2++;
         }
-
-        // Phase 3: Check against threshold > n / 3
         List<Integer> result = new ArrayList<>();
         int threshold = nums.length / 3;
         if (count1 > threshold) result.add(el1);
         if (count2 > threshold) result.add(el2);
-
         return result;
-    }
+}
 }

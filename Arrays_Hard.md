@@ -10,8 +10,8 @@ A comprehensive, organized guide to **Hard Array Problems** from the DSA Sheet, 
 |:---:|:---|:---:|:---|
 | 1 | [Pascal's Triangle (All 3 Variations)](#1-pascals-triangle-leetcode-118) | ✅ Complete | Combinatorics / Row Multiplier |
 | 2 | [Majority Element II (> ⌊n/3⌋)](#2-majority-element-ii-n3-times) | ✅ Complete | Extended Boyer-Moore Voting (2 Candidates) |
-| 3 | 3 Sum | 📌 Track | Sorting + Two Pointers |
-| 4 | 4 Sum | 📌 Track | Sorting + Two Pointers (2 Fixed Pointers) |
+| 3 | [3 Sum](#3-3-sum-leetcode-15) | ✅ Complete | Sorting + Two Pointers |
+| 4 | [4 Sum](#4-4-sum-leetcode-18) | ✅ Complete | Sorting + Two Pointers (2 Fixed Loops) |
 | 5 | Largest Subarray with 0 Sum | 📌 Track | Prefix Sum + First-Occurrence HashMap |
 | 6 | Count Subarrays with Given XOR K | 📌 Track | Prefix XOR + Frequency HashMap |
 | 7 | Merge Overlapping Subintervals | 📌 Track | Sort by Start Time + Linear Merge |
@@ -358,9 +358,270 @@ class Solution {
 
 ---
 
+## 3. 3 Sum (LeetCode 15)
+
+Given an integer array `nums`, return all the unique triplets `[nums[i], nums[j], nums[k]]` such that:
+- `i != j`, `i != k`, and `j != k`
+- `nums[i] + nums[j] + nums[k] == 0`
+- The solution set **must not contain duplicate triplets**.
+
+```
+Input:  nums = [-1, 0, 1, 2, -1, -4]
+Output: [[-1, -1, 2], [-1, 0, 1]]
+```
+
+---
+
+### The Duplicate Problem
+A brute-force solution checking every triplet generates duplicate triplets in different index orders (e.g., `[-1, 0, 1]` vs `[0, 1, -1]`).
+- Sorting each triplet before adding to a `Set` costs extra time ($O(N^3 \log 3)$) and memory ($O(N)$ for HashSet).
+- The **optimal approach** sorts the entire array first and uses **Two Pointers** with duplicate skipping to produce distinct triplets in $O(1)$ auxiliary space!
+
+---
+
+### Approach 1: Brute Force (3 Nested Loops)
+Check all possible triplets with 3 loops, sort each triplet, and add to a `HashSet<List<Integer>>`.
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | O(n³ × log 3) ≈ O(n³) |
+| **Space** | O(2 × no. of unique triplets) |
+
+---
+
+### Approach 2: Better (Hashing with HashSet)
+
+#### Intuition:
+From $nums[i] + nums[j] + nums[k] = 0$, we have:
+$$\text{nums}[k] = -(\text{nums}[i] + \text{nums}[j])$$
+
+Iterate through pairs $(i, j)$ and maintain a `HashSet` of seen elements between $i$ and $j$. If the required third element is in the set, add the sorted triplet to a `Set<List<Integer>>`.
+
+```java
+import java.util.*;
+
+class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        int n = nums.length;
+        Set<List<Integer>> set = new HashSet<>();
+
+        for (int i = 0; i < n; i++) {
+            Set<Integer> seen = new HashSet<>();
+            for (int j = i + 1; j < n; j++) {
+                int required = -(nums[i] + nums[j]);
+
+                if (seen.contains(required)) {
+                    List<Integer> triplet = Arrays.asList(nums[i], nums[j], required);
+                    Collections.sort(triplet);
+                    set.add(triplet);
+                }
+                seen.add(nums[j]);
+            }
+        }
+        return new ArrayList<>(set);
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | O(n² × log(no. of unique triplets)) |
+| **Space** | O(n) + O(2 × no. of unique triplets) |
+
+---
+
+### Approach 3: Optimal (Sorting + Two Pointers) ✨
+
+#### Intuition & Algorithm:
+1. **Sort `nums`** in non-decreasing order.
+2. Fix `nums[i]` using an outer loop:
+   - If `nums[i] > 0`, break immediately (the remaining elements are all positive, sum cannot be $0$).
+   - If `i > 0` and `nums[i] == nums[i - 1]`, `continue` to avoid duplicate triplets.
+3. Place two pointers: `left = i + 1`, `right = n - 1`.
+4. While `left < right`:
+   - `sum = nums[i] + nums[left] + nums[right]`
+   - If `sum == 0`:
+     - Add `[nums[i], nums[left], nums[right]]` to result.
+     - Move `left++` and skip duplicate values (`while (left < right && nums[left] == nums[left - 1]) left++`).
+     - Move `right--` and skip duplicate values (`while (left < right && nums[right] == nums[right + 1]) right--`).
+   - If `sum < 0`: need larger sum $\implies$ `left++`.
+   - If `sum > 0`: need smaller sum $\implies$ `right--`.
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> ans = new ArrayList<>();
+        Arrays.sort(nums);
+        int n = nums.length;
+
+        for (int i = 0; i < n; i++) {
+            if (nums[i] > 0) break;
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+
+            int left = i + 1;
+            int right = n - 1;
+
+            while (left < right) {
+                int sum = nums[i] + nums[left] + nums[right];
+
+                if (sum == 0) {
+                    ans.add(Arrays.asList(nums[i], nums[left], nums[right]));
+                    left++;
+                    right--;
+
+                    while (left < right && nums[left] == nums[left - 1]) left++;
+                    while (left < right && nums[right] == nums[right + 1]) right--;
+                } else if (sum < 0) {
+                    left++;
+                } else {
+                    right--;
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | O(n log n + n²) = **O(n²)** |
+| **Space** | **O(1)** extra space (excluding space for result list) |
+
+---
+
+## 4. 4 Sum (LeetCode 18)
+
+Given an array `nums` of `n` integers and an integer `target`, return all unique quadruplets `[nums[a], nums[b], nums[c], nums[d]]` such that $nums[a] + nums[b] + nums[c] + nums[d] == target$ with distinct indices $a, b, c, d$.
+
+```
+Input:  nums = [1, 0, -1, 0, -2, 2], target = 0
+Output: [[-2, -1, 1, 2], [-2, 0, 0, 2], [-1, 0, 0, 1]]
+```
+
+---
+
+### ⚠️ Critical Interview Trap: Integer Overflow!
+When adding 4 numbers that can each be up to $10^9$ or $-10^9$, their sum can exceed standard 32-bit signed integer limits ($[-2^{31}, 2^{31}-1]$).
+Always perform the 4-element sum with `long`:
+```java
+long sum = (long) nums[i] + nums[j] + nums[k] + nums[l];
+```
+
+---
+
+### Approach 1: Brute Force (4 Nested Loops)
+Check all four combinations with four loops and insert sorted quadruplets into a `HashSet`.
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | O(n⁴) |
+| **Space** | O(2 × no. of unique quadruplets) |
+
+---
+
+### Approach 2: Better (Hashing with 3 Nested Loops)
+Fix three elements ($i, j, k$) and compute the required fourth element:
+$$\text{required} = \text{target} - (\text{nums}[i] + \text{nums}[j] + \text{nums}[k])$$
+Check against an intermediate `HashSet` of elements seen between $j$ and $k$.
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | O(n³ × log(no. of unique quadruplets)) |
+| **Space** | O(n) + O(2 × no. of unique quadruplets) |
+
+---
+
+### Approach 3: Optimal (Sorting + 2 Fixed Loops + Two Pointers) ✨
+
+#### Intuition & Algorithm:
+1. **Sort `nums`** in ascending order.
+2. Loop $i$ from $0$ to $n - 1$:
+   - Skip duplicates: `if (i > 0 && nums[i] == nums[i - 1]) continue;`
+3. Loop $j$ from $i + 1$ to $n - 1$:
+   - Skip duplicates: `if (j > i + 1 && nums[j] == nums[j - 1]) continue;`
+4. Use two pointers: `k = j + 1`, `l = n - 1`.
+5. While `k < l`:
+   - `long sum = (long) nums[i] + nums[j] + nums[k] + nums[l];`
+   - If `sum == target`:
+     - Add `[nums[i], nums[j], nums[k], nums[l]]` to output.
+     - Advance `k++` and skip identical duplicates.
+     - Decrement `l--` and skip identical duplicates.
+   - If `sum < target`: `k++`.
+   - If `sum > target`: `l--`.
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class Solution {
+    public List<List<Integer>> fourSum(int[] nums, int target) {
+        List<List<Integer>> ans = new ArrayList<>();
+        Arrays.sort(nums);
+        int n = nums.length;
+
+        for (int i = 0; i < n; i++) {
+            // Skip duplicates for 1st pointer
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+
+            for (int j = i + 1; j < n; j++) {
+                // Skip duplicates for 2nd pointer
+                if (j > i + 1 && nums[j] == nums[j - 1]) continue;
+
+                int k = j + 1;
+                int l = n - 1;
+
+                while (k < l) {
+                    long sum = (long) nums[i] + nums[j] + nums[k] + nums[l];
+
+                    if (sum == target) {
+                        ans.add(Arrays.asList(nums[i], nums[j], nums[k], nums[l]));
+                        k++;
+                        l--;
+
+                        // Skip duplicates for 3rd and 4th pointers
+                        while (k < l && nums[k] == nums[k - 1]) k++;
+                        while (k < l && nums[l] == nums[l + 1]) l--;
+                    } else if (sum < target) {
+                        k++;
+                    } else {
+                        l--;
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | O(n log n + n³) = **O(n³)** |
+| **Space** | **O(1)** extra space (excluding output list) |
+
+---
+
+### 🧩 Generalization to K-Sum
+| Problem | Fixed Loops | Moving Pointers | Time Complexity |
+|---------|:-----------:|:---------------:|:---------------:|
+| 2 Sum (Sorted) | 0 | 2 (`i`, `j`) | O(n) |
+| 3 Sum | 1 (`i`) | 2 (`left`, `right`) | O(n²) |
+| 4 Sum | 2 (`i`, `j`) | 2 (`k`, `l`) | O(n³) |
+| **K-Sum** | **K - 2** | **2** | **O(n^(K-1))** |
+
+---
+
 ## 📝 Hard Track Summary
 
 | # | Problem | Core Pattern | Time | Space |
 |---|---------|--------------|------|-------|
 | 1 | Pascal's Triangle (3 Variations) | Combinatorics / Row Multiplier | O(N²) | O(1) extra |
 | 2 | Majority Element II (> ⌊n/3⌋) | Extended Boyer-Moore (2 Candidates) | O(n) | O(1) |
+| 3 | 3 Sum | Sorting + 1 Fixed Loop + Two Pointers | O(n²) | O(1) extra |
+| 4 | 4 Sum | Sorting + 2 Fixed Loops + Two Pointers (with `long` casting) | O(n³) | O(1) extra |

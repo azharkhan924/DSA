@@ -1,0 +1,231 @@
+3Sum
+
+Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.
+
+Notice that the solution set must not contain duplicate triplets.
+
+Approach 1: Brute Force O(n3)
+sort thr triplet before storing to identify unique triplets
+
+Approach 2: Use Hashing 
+nums[i]+nums[j]+nums[k]=0
+nums[k]=-(nums[i]+nums[j])
+
+Use nested loop and push every intermediate element in HashSet
+
+class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        Set<List<Integer>> ans = new HashSet<>();
+        for(int i=0;i<nums.length;i++){
+            Set<Integer> s=new HashSet<>();
+            for(int j=i+1;j<nums.length;j++){
+                int e= -(nums[i]+nums[j]);
+                if(s.contains(e)){
+                    List<Integer> triplet=new ArrayList<>();
+                    triplet.add(nums[i]);
+                    triplet.add(nums[j]);
+                    triplet.add(e);
+                    Collections.sort(triplet);
+                    ans.add(triplet);
+                }
+                s.add(nums[j]);
+            }
+        }
+        List<List<Integer>> res= new ArrayList<>();
+        for(List l:ans)res.add(l);
+        return res;
+    }
+}
+Approach 3: Advanced two pinter approach
+
+Sort the array first.
+Fix the first number using a loop from the beginning to the end of the array.
+Skip the number if it is the same as the previous one (to avoid duplicates).
+Use two pointers:
+Left: starts right after the fixed number.
+Right: starts from the last element of the array.
+While the left pointer is before the right pointer:
+If the total is greater than 0 → move the right pointer one step left.
+If the total is less than 0 → move the left pointer one step right.
+If the total equals 0 → store the triplet, then move both pointers while skipping duplicates.
+
+
+
+
+class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> ans=new ArrayList<>();
+        Arrays.sort(nums);
+        for(int i=0;i<nums.length;){
+            int j=i+1,k=nums.length-1;
+            int el3;
+            while(k>j){
+                if(nums[j]+nums[k]+nums[i]==0){
+                    List<Integer> l=new ArrayList<>();
+                    l.add(nums[i]);l.add(nums[j]);l.add(nums[k]);
+                    ans.add(l);
+                    int el1=nums[k--];
+                    while(k>j && nums[k]==el1)k--;
+
+                    int el2=nums[j++];
+                    while(j<k && nums[j]==el2)j++;
+
+                }
+
+                else if(nums[j]+nums[k]+nums[i]>0){
+                    int el=nums[k--];
+                    while(k>j && nums[k]==el)k--;
+                }
+
+                else{
+                    int el=nums[j++];
+                    while(j<k && nums[j]==el)j++;
+
+
+                }
+
+            }
+            el3=nums[i++];
+                    while(i<nums.length && nums[i]==el3)i++;
+        }
+        return ans;
+    }
+}
+
+
+
+4Sum
+
+Given an array nums of n integers, return an array of all the unique quadruplets [nums[a], nums[b], nums[c], nums[d]] such that:
+
+0 <= a, b, c, d < n
+a, b, c, and d are distinct.
+nums[a] + nums[b] + nums[c] + nums[d] == target
+
+
+Input: nums = [1,0,-1,0,-2,2], target = 0
+Output: [[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]
+
+Approach 1: Brute Force
+Approach 2: Create a set to keep only unique groups of four numbers.
+Run the first loop from the start to the end of the array to pick the first number.
+Inside it, run the second loop from the next position to pick the second number.
+Before starting the third loop, make a HashSet to keep track of numbers between the second and third positions.
+Run the third loop from the next position after the second number to the end of the array to pick the third number.
+Find the fourth number by subtracting the total of the first three numbers from the target value.
+If this fourth number is already in the HashSet, arrange all four numbers in order and add them to the set.
+Add the current third number to the HashSet (only numbers between the second and third loops are stored).
+After all loops finish, return the set as a list of unique groups of four numbers.
+
+import java.util.*;
+
+class Solution {
+    // Function to find all unique quadruplets
+    public List<List<Integer>> fourSum(int[] arr, int target) {
+        int n = arr.length;
+        Set<List<Integer>> set = new HashSet<>();
+
+        // First loop - pick first number
+        for (int i = 0; i < n; i++) {
+            // Second loop - pick second number
+            for (int j = i + 1; j < n; j++) {
+                // HashSet for numbers between j and k
+                HashSet<Integer> seen = new HashSet<>();
+
+                // Third loop - pick third number
+                for (int k = j + 1; k < n; k++) {
+                    // Find required fourth number
+                    long required = (long) target - arr[i] - arr[j] - arr[k];
+
+                    // If required number already seen → valid quadruplet
+                    if (seen.contains((int) required)) {
+                        List<Integer> temp = Arrays.asList(arr[i], arr[j], arr[k], (int) required);
+                        Collections.sort(temp);
+                        set.add(temp);
+                    }
+
+                    // Add current third number into set
+                    seen.add(arr[k]);
+                }
+            }
+        }
+        return new ArrayList<>(set);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        int[] arr = {1, 0, -1, 0, -2, 2};
+        int target = 0;
+
+        Solution obj = new Solution();
+        List<List<Integer>> ans = obj.fourSum(arr, target);
+
+        for (List<Integer> quad : ans) {
+            System.out.println(quad);
+        }
+    }
+}
+
+
+
+Approach 3:
+Sort the array first.
+Use the first loop to pick the first number. Skip it if it is the same as the previous one to avoid duplicates.
+Inside it, use the second loop to pick the second number. Also skip it if it repeats the previous one.
+Set two pointers: one just after the second number (left pointer) and one at the end of the array (right pointer).
+While the left pointer is before the right pointer, calculate the total of the four chosen numbers.
+If the total equals the target, save the quadruplet, then move both pointers while skipping duplicate numbers.
+If the total is less than the target, move the left pointer one step forward to increase the total.
+If the total is greater than the target, move the right pointer one step backward to reduce the total.
+After all loops finish, return the list of unique groups of four numbers.
+
+class Solution {
+    public int moveLeft(int[] nums,int i){
+        int element=nums[i--];
+        while(i>0 &&element==nums[i])i--;
+        return i;
+    }
+    public int moveRight(int[] nums,int i){
+        int element=nums[i++];
+        while(i<nums.length && element==nums[i])i++;
+        return i;
+    }
+    public List<List<Integer>> fourSum(int[] nums, int target) {
+        Arrays.sort(nums);
+        List<List<Integer>> ans=new ArrayList<>();
+        for(int i=0;i<nums.length;){
+            for(int j=i+1;j<nums.length;){
+                long a=(long)nums[i];
+                long b=(long)nums[j];
+                long sr=target-(a+b);
+                int k=j+1,l=nums.length-1;
+
+                
+                while(l>k){
+                    long c=(long)nums[k];
+                    long d=(long)nums[l];
+                    long e=c+d;
+                    if(e==sr){
+                        List<Integer> li=new ArrayList<>();
+                        li.add(nums[i]);
+                        li.add(nums[j]);
+                        li.add(nums[k]);
+                        li.add(nums[l]);
+                        ans.add(li);
+                        k=moveRight(nums,k);l=moveLeft(nums,l);
+
+                    }
+                    else if(e>sr){
+                        l=moveLeft(nums,l);
+                    }
+                    else {
+                        k=moveRight(nums,k);
+                    }
+                }
+            j=moveRight(nums,j);    
+
+            }
+            i=moveRight(nums,i);
+        }
+        return ans;
