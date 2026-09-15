@@ -12,8 +12,8 @@ A comprehensive, organized guide to **Hard Array Problems** from the DSA Sheet, 
 | 2 | [Majority Element II (> ⌊n/3⌋)](#2-majority-element-ii-n3-times) | ✅ Complete | Extended Boyer-Moore Voting (2 Candidates) |
 | 3 | [3 Sum](#3-3-sum-leetcode-15) | ✅ Complete | Sorting + Two Pointers |
 | 4 | [4 Sum](#4-4-sum-leetcode-18) | ✅ Complete | Sorting + Two Pointers (2 Fixed Loops) |
-| 5 | Largest Subarray with 0 Sum | 📌 Track | Prefix Sum + First-Occurrence HashMap |
-| 6 | Count Subarrays with Given XOR K | 📌 Track | Prefix XOR + Frequency HashMap |
+| 5 | [Largest Subarray with 0 Sum](#5-largest-subarray-with-0-sum) | ✅ Complete | Prefix Sum + First-Occurrence HashMap |
+| 6 | [Count Subarrays with Given XOR K](#6-count-subarrays-with-given-xor-k) | ✅ Complete | Prefix XOR + Frequency HashMap |
 | 7 | Merge Overlapping Subintervals | 📌 Track | Sort by Start Time + Linear Merge |
 | 8 | Merge Two Sorted Arrays without Extra Space | 📌 Track | Gap Method (Shell Sort) / Backward Fill |
 | 9 | Find Missing & Repeating Number | 📌 Track | Math (Sum & Sum of Squares) / XOR |
@@ -617,6 +617,110 @@ class Solution {
 
 ---
 
+## 5. Largest Subarray with 0 Sum
+
+**Problem:** Given an array containing both positive and negative integers, find the length of the longest subarray with sum equal to `0`.
+
+```
+Input:  arr = [15, -2, 2, -8, 1, 7, 10, 23]
+Output: 5
+Explanation: The longest subarray with sum 0 is [-2, 2, -8, 1, 7] (length 5).
+```
+
+---
+
+### 🧠 Core Intuition (Prefix Sum Collision)
+
+If prefix sum at index `i` is $S$ and at index `j` is also $S$ ($j > i$), the subarray from index $i+1$ to $j$ must have sum $S - S = 0$.
+- To **maximize length** ($j - i$), we only store the **first occurrence** of each prefix sum in the HashMap.
+- Pre-seed `map.put(0, -1)` so that subarrays starting from index 0 whose sum is 0 automatically compute length $i - (-1) = i + 1$.
+
+```java
+import java.util.HashMap;
+
+class Solution {
+    public int maxLen(int[] arr) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        map.put(0, -1); // Handles cases where prefixSum from index 0 is 0
+
+        int prefixSum = 0;
+        int maxLength = 0;
+
+        for (int i = 0; i < arr.length; i++) {
+            prefixSum += arr[i];
+
+            if (map.containsKey(prefixSum)) {
+                maxLength = Math.max(maxLength, i - map.get(prefixSum));
+            } else {
+                map.put(prefixSum, i); // Retain earliest index
+            }
+        }
+
+        return maxLength;
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(n)** — Single pass with O(1) hash map operations |
+| **Space** | **O(n)** — Extra space for prefix sum map |
+
+---
+
+## 6. Count Subarrays with Given XOR K
+
+**Problem:** Given an array of integers `nums` and an integer `k`, return the total number of subarrays whose XOR sum equals `k`.
+
+```
+Input:  nums = [4, 2, 2, 6, 4], k = 6
+Output: 4
+Explanation: Subarrays with XOR = 6 are [4, 2], [4, 2, 2, 6, 4], [2, 2, 6], and [6].
+```
+
+---
+
+### 🧠 Core Intuition (Prefix XOR Property)
+
+Let running prefix XOR up to index `i` be $\text{XR}$. If a subarray ending at `i` has XOR $k$, the previous prefix XOR $x$ satisfies:
+$$x \oplus k = \text{XR} \implies x = \text{XR} \oplus k$$
+
+- For each element, find how many times $x = \text{XR} \oplus k$ was seen previously in the frequency map.
+- Add that frequency to `count`.
+- Pre-seed `map.put(0, 1)` to handle cases where $\text{XR} = k$ directly from index 0 ($x = k \oplus k = 0$).
+
+```java
+import java.util.HashMap;
+
+class Solution {
+    public int subarraysWithXorK(int[] nums, int k) {
+        int xor = 0;
+        int count = 0;
+        HashMap<Integer, Integer> map = new HashMap<>();
+        map.put(0, 1);
+
+        for (int i = 0; i < nums.length; i++) {
+            xor ^= nums[i];
+            int required = xor ^ k;
+
+            if (map.containsKey(required)) {
+                count += map.get(required);
+            }
+            map.put(xor, map.getOrDefault(xor, 0) + 1);
+        }
+
+        return count;
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(n)** — Single pass with O(1) hash map operations |
+| **Space** | **O(n)** — Extra space for prefix XOR frequencies |
+
+---
+
 ## 📝 Hard Track Summary
 
 | # | Problem | Core Pattern | Time | Space |
@@ -625,3 +729,5 @@ class Solution {
 | 2 | Majority Element II (> ⌊n/3⌋) | Extended Boyer-Moore (2 Candidates) | O(n) | O(1) |
 | 3 | 3 Sum | Sorting + 1 Fixed Loop + Two Pointers | O(n²) | O(1) extra |
 | 4 | 4 Sum | Sorting + 2 Fixed Loops + Two Pointers (with `long` casting) | O(n³) | O(1) extra |
+| 5 | Largest Subarray with 0 Sum | Prefix Sum + First-Occurrence HashMap | O(n) | O(n) |
+| 6 | Count Subarrays with Given XOR K | Prefix XOR + Frequency HashMap | O(n) | O(n) |
