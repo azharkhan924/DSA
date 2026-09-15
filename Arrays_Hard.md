@@ -14,7 +14,7 @@ A comprehensive, organized guide to **Hard Array Problems** from the DSA Sheet, 
 | 4 | [4 Sum](#4-4-sum-leetcode-18) | ✅ Complete | Sorting + Two Pointers (2 Fixed Loops) |
 | 5 | [Largest Subarray with 0 Sum](#5-largest-subarray-with-0-sum) | ✅ Complete | Prefix Sum + First-Occurrence HashMap |
 | 6 | [Count Subarrays with Given XOR K](#6-count-subarrays-with-given-xor-k) | ✅ Complete | Prefix XOR + Frequency HashMap |
-| 7 | Merge Overlapping Subintervals | 📌 Track | Sort by Start Time + Linear Merge |
+| 7 | [Merge Overlapping Subintervals](#7-merge-overlapping-subintervals-leetcode-56) | ✅ Complete | Sort by Start Time + Linear Merge |
 | 8 | Merge Two Sorted Arrays without Extra Space | 📌 Track | Gap Method (Shell Sort) / Backward Fill |
 | 9 | Find Missing & Repeating Number | 📌 Track | Math (Sum & Sum of Squares) / XOR |
 | 10 | Count Inversions in an Array | 📌 Track | Modified Merge Sort |
@@ -721,6 +721,63 @@ class Solution {
 
 ---
 
+## 7. Merge Overlapping Subintervals (LeetCode 56)
+
+**Problem:** Given an array of `intervals` where `intervals[i] = [start_i, end_i]`, merge all overlapping intervals and return non-overlapping intervals.
+
+```
+Input:  intervals = [[1, 3], [2, 6], [8, 10], [15, 18]]
+Output: [[1, 6], [8, 10], [15, 18]]
+Explanation: [1, 3] and [2, 6] overlap, resulting in [1, 6].
+```
+
+---
+
+### 🧠 Core Intuition (Sorting + Linear Scan)
+
+By **sorting** intervals by their start times:
+- Any overlapping intervals will become **adjacent**.
+- We iterate linearly:
+  - If `res` is empty or current `start > last_merged_end`: add as a new interval.
+  - If `curr_start <= last_merged_end`: overlap! Extend `last_merged_end = Math.max(last_merged_end, curr_end)`.
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class Solution {
+    public int[][] merge(int[][] intervals) {
+        if (intervals.length <= 1) return intervals;
+
+        // Sort by start times
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+
+        List<int[]> res = new ArrayList<>();
+
+        for (int[] curr : intervals) {
+            // No overlap -> add new interval
+            if (res.isEmpty() || res.get(res.size() - 1)[1] < curr[0]) {
+                res.add(curr);
+            } 
+            // Overlapping -> extend end time
+            else {
+                res.get(res.size() - 1)[1] = Math.max(res.get(res.size() - 1)[1], curr[1]);
+            }
+        }
+
+        return res.toArray(new int[res.size()][]);
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(n log n)** — Sorting dominates; linear scan is O(n) |
+| **Space** | **O(n)** — For storing the result list |
+
+---
+
 ## 📝 Hard Track Summary
 
 | # | Problem | Core Pattern | Time | Space |
@@ -731,3 +788,4 @@ class Solution {
 | 4 | 4 Sum | Sorting + 2 Fixed Loops + Two Pointers (with `long` casting) | O(n³) | O(1) extra |
 | 5 | Largest Subarray with 0 Sum | Prefix Sum + First-Occurrence HashMap | O(n) | O(n) |
 | 6 | Count Subarrays with Given XOR K | Prefix XOR + Frequency HashMap | O(n) | O(n) |
+| 7 | Merge Overlapping Subintervals | Sort by Start Time + Linear Merge | O(n log n) | O(n) |
