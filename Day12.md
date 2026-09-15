@@ -1,4 +1,4 @@
-# Day 12 — Arrays (Hard): Largest Subarray with 0 Sum & Subarrays with XOR K
+# Day 12 — Arrays (Hard): 0-Sum, XOR K & Merge Intervals
 
 ---
 
@@ -19,7 +19,14 @@
    - [Approach 3: Optimal (Prefix XOR + Frequency HashMap) (O(n))](#approach-3-optimal-prefix-xor--frequency-hashmap-on)
    - [Dry Run](#dry-run-example-1)
    - [Complexity Analysis](#complexity-analysis-1)
-3. [💡 Deep Dive: Length vs. Count in Prefix Hashing](#-deep-dive-length-vs-count-in-prefix-hashing)
+3. [Merge Overlapping Subintervals (LeetCode 56)](#3-merge-overlapping-subintervals-leetcode-56)
+   - [Problem Statement](#problem-statement-2)
+   - [Visual Intuition & Overlap Conditions](#visual-intuition--overlap-conditions)
+   - [Approach 1: Brute Force (O(n log n + 2n))](#approach-1-brute-force-on-log-n--2n)
+   - [Approach 2: Optimal (Single-Pass Merge with List) (O(n log n))](#approach-2-optimal-single-pass-merge-with-list-on-log-n)
+   - [Dry Run](#dry-run-example-2)
+   - [Complexity Analysis](#complexity-analysis-2)
+4. [💡 Deep Dive: Length vs. Count in Prefix Hashing](#-deep-dive-length-vs-count-in-prefix-hashing)
 
 ---
 
@@ -339,7 +346,163 @@ class Solution {
 ---
 ---
 
-## 💡 Deep Dive: Length vs. Count in Prefix Hashing
+## 3. Merge Overlapping Subintervals (LeetCode 56)
+
+### Problem Statement
+Given an array of `intervals` where `intervals[i] = [start_i, end_i]`, merge all overlapping intervals, and return an array of the **non-overlapping intervals** that cover all the intervals in the input.
+
+```
+Input:  intervals = [[1, 3], [2, 6], [8, 10], [15, 18]]
+Output: [[1, 6], [8, 10], [15, 18]]
+Explanation: Intervals [1, 3] and [2, 6] overlap into [1, 6].
+```
+
+---
+
+### Visual Intuition & Overlap Conditions
+
+If we **sort** intervals by their start times:
+```
+Interval A: [start_A --------- end_A]
+Interval B:            [start_B --------- end_B]
+Merged:     [start_A -------------------- max(end_A, end_B)]
+```
+
+Because the array is sorted by start time (`start_A <= start_B`):
+- **Overlap Condition:** If `start_B <= end_A`, then interval $B$ overlaps with interval $A$.
+  - Merged Interval: `[start_A, Math.max(end_A, end_B)]`
+- **Non-Overlap Condition:** If `start_B > end_A`, no overlap is possible.
+  - Interval $A$ is completely finalized, and interval $B$ begins a new interval group.
+
+---
+
+### Approach 1: Brute Force (O(n log n + 2n))
+
+1. Sort intervals by start time.
+2. For each interval $i$:
+   - If it was already merged in a previous step (i.e. `intervals[i][1] <= last_merged_end`), skip it.
+   - Expand `end` by checking subsequent intervals $j$: while `intervals[j][0] <= end`, expand `end = max(end, intervals[j][1])`.
+   - Once an interval doesn't overlap, stop and add `[start, end]`.
+
+```java
+import java.util.*;
+
+class Solution {
+    public int[][] merge(int[][] intervals) {
+        int n = intervals.length;
+        if (n <= 1) return intervals;
+
+        // Step 1: Sort by start time
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+
+        List<int[]> ans = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            int start = intervals[i][0];
+            int end = intervals[i][1];
+
+            // If already merged into previous interval, skip
+            if (!ans.isEmpty() && end <= ans.get(ans.size() - 1)[1]) {
+                continue;
+            }
+
+            // Check following intervals for overlap
+            for (int j = i + 1; j < n; j++) {
+                if (intervals[j][0] <= end) {
+                    end = Math.max(end, intervals[j][1]);
+                } else {
+                    break;
+                }
+            }
+            ans.add(new int[]{start, end});
+        }
+
+        return ans.toArray(new int[ans.size()][]);
+    }
+}
+```
+
+| Complexity | Value |
+|---|---|
+| **Time** | $\mathcal{O}(n \log n) + \mathcal{O}(2n)$ |
+| **Space** | $\mathcal{O}(n)$ (to store merged intervals) |
+
+---
+
+### Approach 2: Optimal (Single-Pass Merge with List) (O(n log n))
+
+Instead of checking forward with an inner loop, maintain a dynamic result list and merge in a **single pass**:
+
+#### Algorithm:
+1. Sort `intervals` by start time ascending.
+2. Initialize `List<int[]> res = new ArrayList<>()`.
+3. Traverse each interval `curr`:
+   - If `res` is empty **OR** `curr[0] > res.get(last)[1]`:
+     No overlap $\to$ add `curr` to `res`.
+   - Else:
+     Overlaps $\to$ update `res.get(last)[1] = Math.max(res.get(last)[1], curr[1])`.
+4. Convert `res` to `int[][]` and return.
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class Solution {
+    public int[][] merge(int[][] intervals) {
+        if (intervals.length <= 1) return intervals;
+
+        // 1. Sort intervals by start time
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+
+        // 2. Collect merged intervals dynamically
+        List<int[]> res = new ArrayList<>();
+
+        for (int[] curr : intervals) {
+            // Case 1: First interval OR no overlap with latest merged interval
+            if (res.isEmpty() || res.get(res.size() - 1)[1] < curr[0]) {
+                res.add(curr);
+            } 
+            // Case 2: Overlapping -> extend end time of latest interval
+            else {
+                res.get(res.size() - 1)[1] = Math.max(res.get(res.size() - 1)[1], curr[1]);
+            }
+        }
+
+        // 3. Convert List<int[]> back to 2D array
+        return res.toArray(new int[res.size()][]);
+    }
+}
+```
+
+---
+
+### Dry Run Example
+
+`intervals = [[1, 3], [2, 6], [8, 10], [15, 18]]` (Already sorted by start)
+
+| Step | `curr` | Last in `res` | Overlap Check (`curr[0] <= last[1]`) | Action | `res` State |
+|:---:|:---:|:---:|:---:|:---|:---|
+| 1 | `[1, 3]` | — | — (List empty) | Add `[1, 3]` | `[[1, 3]]` |
+| 2 | `[2, 6]` | `[1, 3]` | $2 \le 3$ (Yes) | Update `last[1] = max(3, 6) = 6` | `[[1, 6]]` |
+| 3 | `[8, 10]` | `[1, 6]` | $8 \le 6$ (No) | Add `[8, 10]` | `[[1, 6], [8, 10]]` |
+| 4 | `[15, 18]` | `[8, 10]` | $15 \le 10$ (No) | Add `[15, 18]` | `[[1, 6], [8, 10], [15, 18]]` |
+
+**Final Result:** `[[1, 6], [8, 10], [15, 18]]` ✅
+
+---
+
+### Complexity Analysis
+
+| Measure | Complexity | Explanation |
+|---|---|---|
+| **Time Complexity** | $\mathcal{O}(n \log n)$ | Dominated by sorting. The linear scan takes $\mathcal{O}(n)$. |
+| **Space Complexity** | $\mathcal{O}(n)$ | To store the output list of merged intervals. |
+
+---
+---
+
+## 4. 💡 Deep Dive: Length vs. Count in Prefix Hashing
 
 Both problems leverage the **Prefix Hashing Pattern**, but have an essential difference:
 
