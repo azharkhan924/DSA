@@ -1,0 +1,240 @@
+Merge two sorted arrays 
+
+Approach 1: using three pointers and extra space
+
+class Solution {
+    public int[] merge(int[] nums1, int m, int[] nums2, int n) {
+        int ans[]=new int[m+n];
+        int i=0,j=0,k=0;
+        while(i<m && j<n){
+            if(nums1[i]<nums2[j]){
+                ans[k++]=nums1[i++];
+            }
+            else {
+                ans[k++]=nums2[j++];
+            }
+        }
+
+        while(i<m)ans[k++]=nums1[i++];
+        while(j<n)ans[k++]=nums2[j++];
+
+        return ans;
+        
+    }
+}
+
+
+Approach 2: 
+Use 2 pointers i on nums 1 and j on nums 2 compare them 
+if nums1[i]<nums2[j] i++,j++
+else swap
+
+Example 1
+Input: nums1 = [-5, -2, 4, 5], nums2 = [-3, 1, 8]
+Output: [-5, -3, -2, 1, 4, 5, 8]
+
+int left = m - 1;
+int right = 0;
+
+while (left >= 0 && right < n) {
+    if (nums1[left] > nums2[right]) {
+        // Swap
+        int temp = nums1[left];
+        nums1[left] = nums2[right];
+        nums2[right] = temp;
+        
+        left--;
+        right++;
+    } else {
+        // Since both arrays were sorted, no more swaps needed
+        break;
+    }
+}
+
+Arrays.sort(nums1);
+Arrays.sort(nums2);
+
+
+Approach 3: Shell sort Approach
+
+int g=(m+n)/2;
+add nums1 and nums2 to nums
+while(g>0){
+for(int i=0;i<m+n-g;i++){
+    if(nums[i]>nums[i+g])swap(nums[i],nums[i+g])
+}
+g=ceil(g/2)
+}ning n elements back to nums2.
+
+class Solution {
+    public void merge(int[] nums1, int m, int[] nums2, int n) {
+        int[] ans = new int[m + n];
+        int i = 0, j = 0, k = 0;
+
+        while (i < m && j < n) {
+            if (nums1[i] <= nums2[j]) {
+                ans[k++] = nums1[i++];
+            } else {
+                ans[k++] = nums2[j++];
+            }
+        }
+
+        while (i < m) ans[k++] = nums1[i++];
+        while (j < n) ans[k++] = nums2[j++];
+
+        // Copy back to nums1 and nums2
+        for (int p = 0; p < m; p++) {
+            nums1[p] = ans[p];
+        }
+        for (int p = 0; p < n; p++) {
+            nums2[p] = ans[m + p];
+        }
+    }
+}
+
+Time Complexity: O(m + n)
+Space Complexity: O(m + n)
+
+
+--------------------------------------------------------------------------------
+
+
+Approach 2: Two Pointers from Extremes + Sorting (O(min(m, n)) + O(m log m) + O(n log n))
+
+Intuition:
+- nums1 should end up with the m smallest elements, and nums2 should end up with the n largest elements.
+- The largest elements of nums1 are at the end (pointer left at m - 1).
+- The smallest elements of nums2 are at the start (pointer right at 0).
+- If nums1[left] > nums2[right], they are in the wrong arrays! Swap them, decrement left, and increment right.
+- As soon as nums1[left] <= nums2[right], all elements in nums1 are smaller than all elements in nums2, so break early!
+- Finally, sort both nums1 and nums2 individually to restore their internal order.
+
+import java.util.Arrays;
+
+class Solution {
+    public void merge(int[] nums1, int m, int[] nums2, int n) {
+        int left = m - 1;
+        int right = 0;
+
+        while (left >= 0 && right < n) {
+            if (nums1[left] > nums2[right]) {
+                // Swap
+                int temp = nums1[left];
+                nums1[left] = nums2[right];
+                nums2[right] = temp;
+
+                left--;
+                right++;
+            } else {
+                // Since both were already sorted, no further elements will violate the condition
+                break;
+            }
+        }
+
+        // Restore individual sorted order
+        Arrays.sort(nums1);
+        Arrays.sort(nums2);
+    }
+}
+
+Time Complexity: O(min(m, n)) + O(m log m) + O(n log n)
+Space Complexity: O(1)
+
+
+--------------------------------------------------------------------------------
+
+
+Approach 3: Optimal - Gap Method / Shell Sort Intuition (O((m + n) log(m + n)) Time, O(1) Space)
+
+Intuition:
+- Based on Shell Sort's gap sequence.
+- Treat nums1 and nums2 as one contiguous virtual array of length m + n.
+- Start with gap = ceil((m + n) / 2.0).
+- In each pass, compare elements at index i and i + gap:
+  - If element at i > element at i + gap, swap them.
+- Map the virtual index:
+  - If index < m: points to nums1[index]
+  - If index >= m: points to nums2[index - m]
+- After each pass, reduce gap = ceil(gap / 2.0).
+- When gap == 1 finishes, both arrays are fully sorted without needing Arrays.sort!
+
+class Solution {
+    public void merge(int[] nums1, int m, int[] nums2, int n) {
+        int len = m + n;
+        int gap = (len / 2) + (len % 2); // Equivalent to ceil(len / 2.0)
+
+        while (gap > 0) {
+            int left = 0;
+            int right = left + gap;
+
+            while (right < len) {
+                // Case 1: Both in nums1
+                if (left < m && right < m) {
+                    if (nums1[left] > nums1[right]) {
+                        int temp = nums1[left];
+                        nums1[left] = nums1[right];
+                        nums1[right] = temp;
+                    }
+                }
+                // Case 2: left in nums1, right in nums2
+                else if (left < m && right >= m) {
+                    if (nums1[left] > nums2[right - m]) {
+                        int temp = nums1[left];
+                        nums1[left] = nums2[right - m];
+                        nums2[right - m] = temp;
+                    }
+                }
+                // Case 3: Both in nums2
+                else {
+                    if (nums2[left - m] > nums2[right - m]) {
+                        int temp = nums2[left - m];
+                        nums2[left - m] = nums2[right - m];
+                        nums2[right - m] = temp;
+                    }
+                }
+
+                left++;
+                right++;
+            }
+
+            if (gap == 1) break;
+            gap = (gap / 2) + (gap % 2); // ceil(gap / 2.0)
+        }
+    }
+}
+
+Time Complexity: O((m + n) log(m + n))
+Space Complexity: O(1)
+
+
+--------------------------------------------------------------------------------
+
+
+Approach 4: LeetCode 88 Specific - Three Pointers from the End (O(m + n) Time, O(1) Space)
+
+Context: In LeetCode 88, nums1 has size m + n with extra 0s at the end. We can fill nums1 from back to front without overwriting unvisited values!
+
+class Solution {
+    public void merge(int[] nums1, int m, int[] nums2, int n) {
+        int i = m - 1;       // Last element of valid nums1
+        int j = n - 1;       // Last element of nums2
+        int k = m + n - 1;   // Last position in nums1
+
+        while (i >= 0 && j >= 0) {
+            if (nums1[i] > nums2[j]) {
+                nums1[k--] = nums1[i--];
+            } else {
+                nums1[k--] = nums2[j--];
+            }
+        }
+
+        // Copy remaining elements of nums2 if any
+        while (j >= 0) {
+            nums1[k--] = nums2[j--];
+        }
+        // If i >= 0, remaining nums1 elements are already in place
+    }
+}
+
+Time Complexity: O(m + n)
+Space Complexity: O(1)

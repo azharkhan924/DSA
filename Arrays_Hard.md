@@ -15,7 +15,7 @@ A comprehensive, organized guide to **Hard Array Problems** from the DSA Sheet, 
 | 5 | [Largest Subarray with 0 Sum](#5-largest-subarray-with-0-sum) | ✅ Complete | Prefix Sum + First-Occurrence HashMap |
 | 6 | [Count Subarrays with Given XOR K](#6-count-subarrays-with-given-xor-k) | ✅ Complete | Prefix XOR + Frequency HashMap |
 | 7 | [Merge Overlapping Subintervals](#7-merge-overlapping-subintervals-leetcode-56) | ✅ Complete | Sort by Start Time + Linear Merge |
-| 8 | Merge Two Sorted Arrays without Extra Space | 📌 Track | Gap Method (Shell Sort) / Backward Fill |
+| 8 | [Merge Two Sorted Arrays without Extra Space](#8-merge-two-sorted-arrays-without-extra-space) | ✅ Complete | Gap Method (Shell Sort) / Backward Fill |
 | 9 | Find Missing & Repeating Number | 📌 Track | Math (Sum & Sum of Squares) / XOR |
 | 10 | Count Inversions in an Array | 📌 Track | Modified Merge Sort |
 | 11 | Reverse Pairs | 📌 Track | Modified Merge Sort (Counting Step) |
@@ -778,6 +778,152 @@ class Solution {
 
 ---
 
+## 8. Merge Two Sorted Arrays without Extra Space
+
+### Problem Statement
+Given two sorted integer arrays `nums1` of size `m` and `nums2` of size `n`, merge them without using any extra auxiliary space ($O(1)$ space) such that:
+- `nums1` contains the first `m` smallest elements sorted.
+- `nums2` contains the remaining `n` elements sorted.
+
+```
+Input:  nums1 = [-5, -2, 4, 5], nums2 = [-3, 1, 8]
+Output: nums1 = [-5, -3, -2, 1], nums2 = [4, 5, 8]
+```
+
+---
+
+### Approach 1: Two Pointers from Extremes + Sorting (Optimal 1)
+
+#### Intuition
+- `nums1` should hold the $m$ smallest elements, while `nums2` holds the $n$ largest elements.
+- The largest elements of `nums1` are at the end (`left = m - 1`), and the smallest of `nums2` are at the start (`right = 0`).
+- If `nums1[left] > nums2[right]`, swap them, `left--`, `right++`.
+- Break when `nums1[left] <= nums2[right]`, then sort both arrays.
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public void merge(int[] nums1, int m, int[] nums2, int n) {
+        int left = m - 1;
+        int right = 0;
+
+        while (left >= 0 && right < n) {
+            if (nums1[left] > nums2[right]) {
+                int temp = nums1[left];
+                nums1[left] = nums2[right];
+                nums2[right] = temp;
+                left--;
+                right++;
+            } else {
+                break;
+            }
+        }
+
+        Arrays.sort(nums1);
+        Arrays.sort(nums2);
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(min(m, n)) + O(m log m) + O(n log n)** |
+| **Space** | **O(1)** auxiliary space |
+
+---
+
+### Approach 2: Gap Method / Shell Sort (Optimal 2 — No Library Sort)
+
+#### Intuition
+- Treat `nums1` and `nums2` as a single virtual array of length `m + n`.
+- Initialize `gap = ceil((m + n) / 2.0)`.
+- Compare elements separated by `gap` and swap if out of order.
+- Divide `gap` by 2 (ceiling) after each pass until `gap = 1` finishes.
+
+```java
+class Solution {
+    public void merge(int[] nums1, int m, int[] nums2, int n) {
+        int len = m + n;
+        int gap = (len / 2) + (len % 2);
+
+        while (gap > 0) {
+            int left = 0;
+            int right = left + gap;
+
+            while (right < len) {
+                // Both in nums1
+                if (left < m && right < m) {
+                    if (nums1[left] > nums1[right]) {
+                        swap(nums1, left, nums1, right);
+                    }
+                }
+                // left in nums1, right in nums2
+                else if (left < m && right >= m) {
+                    if (nums1[left] > nums2[right - m]) {
+                        swap(nums1, left, nums2, right - m);
+                    }
+                }
+                // Both in nums2
+                else {
+                    if (nums2[left - m] > nums2[right - m]) {
+                        swap(nums2, left - m, nums2, right - m);
+                    }
+                }
+                left++;
+                right++;
+            }
+
+            if (gap == 1) break;
+            gap = (gap / 2) + (gap % 2);
+        }
+    }
+
+    private void swap(int[] a, int i, int[] b, int j) {
+        int t = a[i];
+        a[i] = b[j];
+        b[j] = t;
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O((m + n) log(m + n))** |
+| **Space** | **O(1)** auxiliary space |
+
+---
+
+### Approach 3: LeetCode 88 (Reverse 3 Pointers)
+*When `nums1` already has a buffer of size $m + n$*:
+
+```java
+class Solution {
+    public void merge(int[] nums1, int m, int[] nums2, int n) {
+        int i = m - 1, j = n - 1, k = m + n - 1;
+
+        while (i >= 0 && j >= 0) {
+            if (nums1[i] > nums2[j]) {
+                nums1[k--] = nums1[i--];
+            } else {
+                nums1[k--] = nums2[j--];
+            }
+        }
+
+        while (j >= 0) {
+            nums1[k--] = nums2[j--];
+        }
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(m + n)** |
+| **Space** | **O(1)** |
+
+---
+
 ## 📝 Hard Track Summary
 
 | # | Problem | Core Pattern | Time | Space |
@@ -789,3 +935,4 @@ class Solution {
 | 5 | Largest Subarray with 0 Sum | Prefix Sum + First-Occurrence HashMap | O(n) | O(n) |
 | 6 | Count Subarrays with Given XOR K | Prefix XOR + Frequency HashMap | O(n) | O(n) |
 | 7 | Merge Overlapping Subintervals | Sort by Start Time + Linear Merge | O(n log n) | O(n) |
+| 8 | Merge Two Sorted Arrays without Extra Space | Gap Method (Shell Sort) / Backward Fill | O((m+n) log(m+n)) | O(1) |
