@@ -16,10 +16,10 @@ A comprehensive, organized guide to **Hard Array Problems** from the DSA Sheet, 
 | 6 | [Count Subarrays with Given XOR K](#6-count-subarrays-with-given-xor-k) | ✅ Complete | Prefix XOR + Frequency HashMap |
 | 7 | [Merge Overlapping Subintervals](#7-merge-overlapping-subintervals-leetcode-56) | ✅ Complete | Sort by Start Time + Linear Merge |
 | 8 | [Merge Two Sorted Arrays without Extra Space](#8-merge-two-sorted-arrays-without-extra-space) | ✅ Complete | Gap Method (Shell Sort) / Backward Fill |
-| 9 | Find Missing & Repeating Number | 📌 Track | Math (Sum & Sum of Squares) / XOR |
-| 10 | Count Inversions in an Array | 📌 Track | Modified Merge Sort |
-| 11 | Reverse Pairs | 📌 Track | Modified Merge Sort (Counting Step) |
-| 12 | Maximum Product Subarray | 📌 Track | Prefix/Suffix Scan or Min-Max Kadane |
+| 9 | [Find Missing & Repeating Number](#9-find-missing--repeating-number) | ✅ Complete | Math (Sum & Sum of Squares) / XOR |
+| 10 | [Count Inversions in an Array](#10-count-inversions-in-an-array) | ✅ Complete | Modified Merge Sort |
+| 11 | [Reverse Pairs](#11-reverse-pairs-leetcode-493) | ✅ Complete | Modified Merge Sort (Counting Step) |
+| 12 | [Maximum Product Subarray](#12-maximum-product-subarray-leetcode-152) | ✅ Complete | Prefix/Suffix Scan |
 
 ---
 
@@ -924,6 +924,435 @@ class Solution {
 
 ---
 
+## 9. Find Missing & Repeating Number
+
+**Problem:** Given an integer array `nums` of size `n` containing values from `[1, n]`. Each value appears exactly once, except for `A` (appears twice) and `B` (missing). Return `[A, B]`.
+
+```
+Input:  nums = [3, 5, 4, 1, 1]
+Output: [1, 2]
+Explanation: 1 appears twice (repeating), 2 is missing.
+```
+
+---
+
+### Approach 1: Brute Force — Count Every Element
+
+For each number from `1` to `n`, count its occurrences in the array.
+
+```java
+class Solution {
+    public int[] findMissingAndRepeating(int[] nums) {
+        int n = nums.length;
+        int r = -1, m = -1;
+
+        for (int i = 1; i <= n; i++) {
+            int count = 0;
+            for (int j = 0; j < n; j++) {
+                if (nums[j] == i) count++;
+            }
+            if (count == 2) r = i;
+            else if (count == 0) m = i;
+
+            if (r != -1 && m != -1) break;
+        }
+
+        return new int[]{r, m};
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(n²)** — For each number 1 to n, scan the array |
+| **Space** | **O(1)** |
+
+---
+
+### Approach 2: Hash Array (Frequency Counting)
+
+Use an auxiliary count array of size `n + 1` to track frequencies.
+
+```java
+class Solution {
+    public int[] findMissingAndRepeating(int[] nums) {
+        int n = nums.length;
+        int[] hash = new int[n + 1];
+        int r = -1, m = -1;
+
+        for (int i = 0; i < n; i++) hash[nums[i]]++;
+
+        for (int i = 1; i <= n; i++) {
+            if (hash[i] == 2) r = i;
+            else if (hash[i] == 0) m = i;
+        }
+
+        return new int[]{r, m};
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(n)** |
+| **Space** | **O(n)** — Extra hash array |
+
+---
+
+### Approach 3: Optimal — Math (Sum & Sum of Squares) ✨
+
+#### Intuition
+
+Let `R` = repeating, `M` = missing. Using the expected sums vs actual sums:
+
+1. **Sum equation:** `actualSum - Sn = R - M` → `diff`
+2. **Sum of squares equation:** `actualSum² - S2n = R² - M² = (R - M)(R + M)` → `diffsqr`
+3. **Solve:** `R + M = diffsqr / diff` → `sumPlus`
+4. **Result:** `R = (diff + sumPlus) / 2`, `M = R - diff`
+
+> ⚠️ **Important:** Always use `long` to prevent integer overflow when computing `n(n+1)(2n+1)/6` and squared sums.
+
+```java
+class Solution {
+    public int[] findMissingAndRepeating(int[] nums) {
+        long n = nums.length;
+
+        long sumN = (n * (n + 1)) / 2;
+        long sum2N = (n * (n + 1) * (2 * n + 1)) / 6;
+
+        long actualSum = 0, actualSum2 = 0;
+        for (int i = 0; i < n; i++) {
+            actualSum += nums[i];
+            actualSum2 += (long) nums[i] * (long) nums[i];
+        }
+
+        long diff = actualSum - sumN;          // R - M
+        long diffsqr = actualSum2 - sum2N;     // R² - M²
+        long sumPlus = diffsqr / diff;         // R + M
+
+        long r = (diff + sumPlus) / 2;
+        long m = r - diff;
+
+        return new int[]{(int) r, (int) m};
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(n)** — Single pass |
+| **Space** | **O(1)** |
+
+---
+
+## 10. Count Inversions in an Array
+
+**Problem:** Given an array `nums`, count the number of inversions: pairs `(i, j)` where `i < j` and `nums[i] > nums[j]`.
+
+```
+Input:  nums = [5, 3, 2, 4, 1]
+Output: 7
+Explanation: Inversions are (5,3), (5,2), (5,4), (5,1), (3,2), (3,1), (4,1)
+```
+
+---
+
+### Approach 1: Brute Force — Nested Loop
+
+```java
+class Solution {
+    public long countInversions(int[] nums) {
+        long count = 0;
+        int n = nums.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if (nums[i] > nums[j]) count++;
+            }
+        }
+        return count;
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(n²)** |
+| **Space** | **O(1)** |
+
+---
+
+### Approach 2: Optimal — Modified Merge Sort ✨
+
+#### 🧠 Core Intuition
+
+During the **merge step** of merge sort, when `a[i] > b[j]`, all remaining elements in the left half (`a[i...m1-1]`) also form inversions with `b[j]` (since the left half is sorted). So we add `count += (m1 - i)` and move `j++`.
+
+The counting condition and the merging condition are **identical** here (`a[i] > b[j]`), so we can count directly inside the merge function.
+
+```java
+class Solution {
+    public long countInversions(int[] nums) {
+        return mergeSort(nums, nums.length);
+    }
+
+    private long mergeSort(int[] nums, int n) {
+        if (n <= 1) return 0;
+
+        int m1 = n / 2;
+        int m2 = n - m1;
+
+        int[] a = new int[m1];
+        int[] b = new int[m2];
+
+        for (int i = 0; i < m1; i++) a[i] = nums[i];
+        for (int i = 0; i < m2; i++) b[i] = nums[m1 + i];
+
+        long count = 0;
+        count += mergeSort(a, m1);
+        count += mergeSort(b, m2);
+        count += merge(nums, a, b, m1, m2);
+
+        return count;
+    }
+
+    private long merge(int[] nums, int[] a, int[] b, int m1, int m2) {
+        int[] ans = new int[m1 + m2];
+        int i = 0, j = 0, k = 0;
+        long count = 0;
+
+        while (i < m1 && j < m2) {
+            if (a[i] <= b[j]) {
+                ans[k++] = a[i++];
+            } else {
+                // a[i] > b[j] => all elements a[i...m1-1] form inversions with b[j]
+                count += (m1 - i);
+                ans[k++] = b[j++];
+            }
+        }
+
+        while (i < m1) ans[k++] = a[i++];
+        while (j < m2) ans[k++] = b[j++];
+
+        for (int p = 0; p < ans.length; p++) nums[p] = ans[p];
+
+        return count;
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(n log n)** — Standard merge sort time |
+| **Space** | **O(n)** — Temporary arrays for merging |
+
+---
+
+## 11. Reverse Pairs (LeetCode 493)
+
+**Problem:** Given an integer array `nums`, return the number of **reverse pairs**: pairs `(i, j)` where `i < j` and `nums[i] > 2 * nums[j]`.
+
+```
+Input:  nums = [1, 3, 2, 3, 1]
+Output: 2
+Explanation: Reverse pairs are (3, 1) and (3, 1)
+```
+
+---
+
+### 🧠 Key Difference from Count Inversions
+
+| Problem | Counting Condition | Merge Condition | Can Count Inside Merge? |
+|---------|-------------------|-----------------|-------------------------|
+| Count Inversions | `a[i] > b[j]` | `a[i] > b[j]` | ✅ Yes — Same condition |
+| Reverse Pairs | `a[i] > 2 * b[j]` | `a[i] > b[j]` | ❌ No — Different conditions |
+
+Because the counting and merging conditions are **different**, we **must separate** counting into its own pass **before** merging. Otherwise, the merge's pointer movements will cause us to skip valid pairs.
+
+---
+
+### Approach 1: Brute Force — Nested Loop
+
+```java
+class Solution {
+    public int reversePairs(int[] nums) {
+        int count = 0;
+        int n = nums.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if ((long) nums[i] > 2L * nums[j]) count++;
+            }
+        }
+        return count;
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(n²)** |
+| **Space** | **O(1)** |
+
+---
+
+### Approach 2: Optimal — Modified Merge Sort (Separate Counting) ✨
+
+The algorithm has **two phases** at each merge step:
+1. **Count reverse pairs** using a two-pointer pass on the two sorted halves.
+2. **Standard merge** to keep the array sorted for future recursion levels.
+
+> ⚠️ **Integer Overflow:** `2 * nums[j]` can overflow `int` when `nums[j]` is near `Integer.MAX_VALUE`. Always use `2L * b[right]`.
+
+```java
+class Solution {
+    public int reversePairs(int[] nums) {
+        return mergeSort(nums, nums.length);
+    }
+
+    private int mergeSort(int[] nums, int n) {
+        if (n <= 1) return 0;
+
+        int m1 = n / 2;
+        int m2 = n - m1;
+
+        int[] a = new int[m1];
+        int[] b = new int[m2];
+
+        for (int i = 0; i < m1; i++) a[i] = nums[i];
+        for (int i = 0; i < m2; i++) b[i] = nums[m1 + i];
+
+        int count = 0;
+        count += mergeSort(a, m1);
+        count += mergeSort(b, m2);
+
+        // STEP 1: Count reverse pairs (separate two-pointer pass)
+        count += countPairs(a, b, m1, m2);
+
+        // STEP 2: Standard merge (no counting here)
+        merge(nums, a, b, m1, m2);
+
+        return count;
+    }
+
+    // Two-pointer counting pass: O(m1 + m2)
+    private int countPairs(int[] a, int[] b, int m1, int m2) {
+        int count = 0;
+        int right = 0;
+
+        for (int i = 0; i < m1; i++) {
+            while (right < m2 && (long) a[i] > 2L * b[right]) {
+                right++;
+            }
+            count += right;
+        }
+
+        return count;
+    }
+
+    // Standard merge (no counting logic)
+    private void merge(int[] nums, int[] a, int[] b, int m1, int m2) {
+        int[] ans = new int[m1 + m2];
+        int i = 0, j = 0, k = 0;
+
+        while (i < m1 && j < m2) {
+            if (a[i] <= b[j]) ans[k++] = a[i++];
+            else ans[k++] = b[j++];
+        }
+
+        while (i < m1) ans[k++] = a[i++];
+        while (j < m2) ans[k++] = b[j++];
+
+        for (int p = 0; p < ans.length; p++) nums[p] = ans[p];
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(n log n)** — O(n) counting + O(n) merging at each of O(log n) levels |
+| **Space** | **O(n)** — Temporary arrays for merging |
+
+---
+
+## 12. Maximum Product Subarray (LeetCode 152)
+
+**Problem:** Given an integer array `nums`, find the contiguous subarray with the largest product and return the product.
+
+```
+Input:  nums = [2, 3, -2, 4]
+Output: 6
+Explanation: Subarray [2, 3] has the largest product = 6.
+```
+
+---
+
+### 🧠 Core Intuition (Prefix-Suffix Product)
+
+**Key Observations:**
+1. **All positive elements** → multiply everything = max product.
+2. **Even number of negatives** → multiply everything = max product (negatives cancel out).
+3. **Odd number of negatives** → one negative element is a "breaking point". The maximum product is either the prefix product (left of the rightmost negative) or suffix product (right of the leftmost negative).
+4. **Zero present** → zero is a breaking point; reset the running product.
+
+By computing both **prefix** (left → right) and **suffix** (right → left) products, we cover all cases. If either product hits 0, reset it to 1.
+
+---
+
+### Approach 1: Brute Force — Nested Loop
+
+```java
+class Solution {
+    public int maxProduct(int[] nums) {
+        int max = Integer.MIN_VALUE;
+        int n = nums.length;
+
+        for (int i = 0; i < n; i++) {
+            int product = 1;
+            for (int j = i; j < n; j++) {
+                product *= nums[j];
+                max = Math.max(max, product);
+            }
+        }
+        return max;
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(n²)** |
+| **Space** | **O(1)** |
+
+---
+
+### Approach 2: Optimal — Prefix-Suffix Scan ✨
+
+```java
+class Solution {
+    public int maxProduct(int[] nums) {
+        int max = Integer.MIN_VALUE;
+        int prefix = 1, suffix = 1;
+        int n = nums.length;
+
+        for (int i = 0; i < n; i++) {
+            prefix *= nums[i];
+            suffix *= nums[n - 1 - i];
+            max = Math.max(max, Math.max(prefix, suffix));
+            if (prefix == 0) prefix = 1;
+            if (suffix == 0) suffix = 1;
+        }
+
+        return max;
+    }
+}
+```
+
+| Complexity | Value |
+|------------|-------|
+| **Time** | **O(n)** — Single pass |
+| **Space** | **O(1)** |
+
+---
+
 ## 📝 Hard Track Summary
 
 | # | Problem | Core Pattern | Time | Space |
@@ -936,3 +1365,7 @@ class Solution {
 | 6 | Count Subarrays with Given XOR K | Prefix XOR + Frequency HashMap | O(n) | O(n) |
 | 7 | Merge Overlapping Subintervals | Sort by Start Time + Linear Merge | O(n log n) | O(n) |
 | 8 | Merge Two Sorted Arrays without Extra Space | Gap Method (Shell Sort) / Backward Fill | O((m+n) log(m+n)) | O(1) |
+| 9 | Find Missing & Repeating Number | Math (Sum & Sum of Squares) | O(n) | O(1) |
+| 10 | Count Inversions in an Array | Modified Merge Sort | O(n log n) | O(n) |
+| 11 | Reverse Pairs | Modified Merge Sort (Separate Counting) | O(n log n) | O(n) |
+| 12 | Maximum Product Subarray | Prefix-Suffix Product Scan | O(n) | O(1) |

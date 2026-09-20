@@ -1,0 +1,298 @@
+Find missing and repeating number 
+
+Problem Statement: Given an integer array nums of size n containing values from [1, n] and each value appears exactly once in the array, except for A, which appears twice and B which is missing.
+Return the values A and B, as an array of size 2, where A appears in the 0-th index and B in the 1st index.
+
+Input:
+ nums = [3, 5, 4, 1, 1]  
+Output:
+ [1, 2]  
+
+Approach 1 : Count every element using nested loop because number is 1 to n so search for 1 to n  
+
+int r = -1, m = -1;
+for(int i=1;i<=nums.length;i++){
+    int count=0;  
+    for(int j=0;j<nums.length;j++){
+        if(i==nums[j])count++;
+    }
+    if(count==2) r=i;
+    if(count==0) m=i;
+    if(r != -1 && m != -1) break;
+}
+return new int[]{r,m};
+
+ Time Complexity : O(n^2)
+ Space Complexity : O(1)
+
+Approach 2 :  count every element using HashMap or HashArray
+
+int[] hash = new int[n + 1];
+for(int i = 0; i < n; i++) hash[nums[i]]++;
+for(int i = 1; i <= n; i++){
+    if(hash[i] == 2) r = i;
+    else if(hash[i] == 0) m = i;
+}
+return new int[]{r, m};
+
+ Time Complexity : O(n)
+ Space Complexity : O(n)
+
+
+Approach 3: Optimal Approach by using maths
+
+sum-> 1 to n sum = n*(n+1)/2
+Actualsum-> sum of elements in the array
+s2 = sum of squares of 1 to n = n*(n+1)*(2n+1)/6
+Actualsum2 = sum of squares of elements in the array
+
+Let R = repeating, M = missing
+
+diff    = Actualsum - sum     = R - M       ... (1)
+diffsqr = Actualsum2 - s2    = R^2 - M^2   = (R-M)(R+M)
+
+sumPlus = diffsqr / diff = R + M            ... (2)
+
+From (1) and (2):
+R = (diff + sumPlus) / 2
+M = R - diff
+
+NOTE: Use long to avoid integer overflow!
+
+class Solution {
+    public int[] findMissingAndRepeating(int[] nums) {
+        long n = nums.length;
+
+        long sumN = (n * (n + 1)) / 2;
+        long sum2N = (n * (n + 1) * (2 * n + 1)) / 6;
+
+        long actualSum = 0, actualSum2 = 0;
+        for (int i = 0; i < n; i++) {
+            actualSum += nums[i];
+            actualSum2 += (long) nums[i] * (long) nums[i];
+        }
+
+        long diff = actualSum - sumN;          // R - M
+        long diffsqr = actualSum2 - sum2N;     // R^2 - M^2
+        long sumPlus = diffsqr / diff;         // R + M
+
+        long r = (diff + sumPlus) / 2;
+        long m = r - diff;
+
+        return new int[]{(int) r, (int) m};
+    }
+}
+
+ Time Complexity : O(n)
+ Space Complexity : O(1)
+
+
+================================================================================
+
+Count Inversions
+arr[]={5,3,2,4,1}  i<j && a[i]>a[j]
+
+Approach 1 : Nested loop brute force
+
+for(int i=0;i<n;i++){
+    for(int j=i+1;j<n;j++){
+        if(arr[i]>arr[j])count++;
+    }
+}
+Time complexity : O(n^2)
+Space Complexity : O(1)
+
+Approach 2 : Divide and conquer (Modified Merge Sort)
+
+for example we have 2 sorted arrays 
+{2,2,5,6}    {2,2,4,4,8}
+i=0          j=0
+ compare 2 and 2 both equal cant form pair i++
+
+ i=1          j=0
+ compare 2 and 2 both equal cant form pair i++
+
+ i=2          j=0
+ compare 5 and 2 -> 5>2 form pair and every element on right of 5 will form pair
+ therefore count += (m1 - i) and j++
+
+ i=2   j=1
+ again same procedure will be followed 
+ this same logic we will use in merge two sorted array function
+
+class Solution {
+    public long countInverse(int[] nums) {
+        return mergeSort(nums, nums.length);
+    }
+
+    public long mergeSort(int[] nums, int n) {
+        if (n <= 1) return 0;
+
+        int m1 = n / 2;
+        int m2 = n - m1;
+
+        int[] a = new int[m1];
+        int[] b = new int[m2];
+
+        for (int i = 0; i < m1; i++) a[i] = nums[i];
+        for (int i = 0; i < m2; i++) b[i] = nums[m1 + i];
+
+        long count = 0;
+        count += mergeSort(a, m1);
+        count += mergeSort(b, m2);
+        count += mergeArray(nums, a, b, m1, m2);
+
+        return count;
+    }
+
+    public long mergeArray(int[] nums, int[] a, int[] b, int m1, int m2) {
+        int[] ans = new int[m1 + m2];
+        int i = 0, j = 0, k = 0;
+        long count = 0;
+
+        while (i < m1 && j < m2) {
+            if (a[i] <= b[j]) {
+                ans[k++] = a[i++];
+            } else {
+                // a[i] > b[j] => all elements a[i...m1-1] form inversions with b[j]
+                count += (m1 - i);
+                ans[k++] = b[j++];
+            }
+        }
+        while (i < m1) ans[k++] = a[i++];
+        while (j < m2) ans[k++] = b[j++];
+
+        // Copy back to original array
+        for (int p = 0; p < ans.length; p++) nums[p] = ans[p];
+
+        return count;
+    }
+}
+
+Time Complexity : O(n log n)
+Space Complexity : O(n)
+
+
+================================================================================
+
+Reverse Pairs
+
+Given an integer array nums, return the number of reverse pairs in the array.
+A reverse pair is a pair (i, j) where:
+0 <= i < j < nums.length and nums[i] > 2 * nums[j].
+
+Approach 1 : Brute Force nested loop  O(n^2)
+
+Approach 2 : Modified Merge Sort
+
+KEY DIFFERENCE from Count Inversions:
+In Count Inversions -> counting condition (a[i] > b[j]) is SAME as merging condition
+In Reverse Pairs   -> counting condition (a[i] > 2*b[j]) is DIFFERENT from merging condition
+
+Therefore we CANNOT count inside the merge function!
+We must do a SEPARATE counting pass BEFORE merging.
+
+class Solution {
+    public int reversePairs(int[] nums) {
+        return mergeSort(nums, nums.length);
+    }
+
+    public int mergeSort(int[] nums, int n) {
+        if (n <= 1) return 0;
+
+        int m1 = n / 2;
+        int m2 = n - m1;
+
+        int[] a = new int[m1];
+        int[] b = new int[m2];
+
+        for (int i = 0; i < m1; i++) a[i] = nums[i];
+        for (int i = 0; i < m2; i++) b[i] = nums[m1 + i];
+
+        int count = 0;
+        count += mergeSort(a, m1);
+        count += mergeSort(b, m2);
+
+        // STEP 1: Count reverse pairs (separate pass)
+        count += countPairs(a, b, m1, m2);
+
+        // STEP 2: Standard merge (no counting here)
+        mergeArray(nums, a, b, m1, m2);
+
+        return count;
+    }
+
+    // Two-pointer counting: O(m1 + m2)
+    public int countPairs(int[] a, int[] b, int m1, int m2) {
+        int count = 0;
+        int right = 0;
+        for (int i = 0; i < m1; i++) {
+            while (right < m2 && (long) a[i] > 2L * b[right]) {
+                right++;
+            }
+            count += right;
+        }
+        return count;
+    }
+
+    // Standard merge (no counting)
+    public void mergeArray(int[] nums, int[] a, int[] b, int m1, int m2) {
+        int[] ans = new int[m1 + m2];
+        int i = 0, j = 0, k = 0;
+
+        while (i < m1 && j < m2) {
+            if (a[i] <= b[j]) ans[k++] = a[i++];
+            else ans[k++] = b[j++];
+        }
+        while (i < m1) ans[k++] = a[i++];
+        while (j < m2) ans[k++] = b[j++];
+
+        for (int p = 0; p < ans.length; p++) nums[p] = ans[p];
+    }
+}
+
+Time Complexity : O(n log n)
+Space Complexity : O(n)
+
+
+================================================================================
+
+Maximum Product Subarray in an Array
+
+Given an integer array nums, find a subarray that has the largest product, and return the product.
+
+Input: nums = [2,3,-2,4]
+Output: 6
+
+Approach 1: Nested loop brute force  O(n^2)
+
+Approach 2: Optimal approach - Prefix Suffix Product
+
+Observations:
+1. For all positive elements -> multiply all = max product
+2. For even number of negatives -> multiply all = max product  
+3. For odd number of negatives -> one negative breaks the chain
+4. If 0 is present -> 0 is also a breaking point
+
+Therefore calculate prefix product (left to right) and suffix product (right to left).
+Maintain a max variable. If prefix or suffix becomes 0, reset to 1.
+
+class Solution {
+    public int maxProduct(int[] nums) {
+        int max = Integer.MIN_VALUE;
+        int prefix = 1, suffix = 1;
+        int n = nums.length;
+
+        for (int i = 0; i < n; i++) {
+            prefix *= nums[i];
+            suffix *= nums[n - 1 - i];
+            max = Math.max(max, Math.max(prefix, suffix));
+            if (prefix == 0) prefix = 1;
+            if (suffix == 0) suffix = 1;
+        }
+        return max;
+    }
+}
+
+Time Complexity : O(n)
+Space Complexity : O(1)
