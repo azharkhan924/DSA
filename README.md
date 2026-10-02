@@ -1,6 +1,6 @@
-# 📚 DSA Notes — Arrays & Problem Solving
+# 📚 DSA Notes — Arrays & Binary Search
 
-A structured, comprehensive collection of Data Structures & Algorithms notes focused on **Array problems**, organized into **Easy**, **Medium**, and **Hard** tracks. Includes multiple approaches, intuitive visual walkthroughs, Java implementations, and time/space complexity analysis.
+A structured, comprehensive collection of Data Structures & Algorithms notes focused on **Array** and **Binary Search** problems, organized by difficulty. Includes multiple approaches, intuitive visual walkthroughs, Java implementations, and time/space complexity analysis.
 
 ---
 
@@ -21,10 +21,18 @@ A structured, comprehensive collection of Data Structures & Algorithms notes foc
 
 ---
 
+## 🔍 Binary Search Track
+
+| Category | Problems Covered | Status | Guide Link |
+|:---|:---|:---:|:---:|
+| 🔍 **Binary Search** | 17 Problems (Standard BS, Lower/Upper Bound, Search Insert, Floor/Ceil, First/Last Occurrence, Count Occurrences, Rotated Array Search, Find Min, Rotations, Single Element, Peak Element, Sqrt, Nth Root, Koko Eating Bananas) | 17 / 17 ✅ | [Binary_Search.md](Binary%20Search/Binary_Search.md) |
+
+---
+
 ## 📖 Day-wise Notes Archive
 
 <details>
-<summary>Click to expand Day 1 to Day 14 notes</summary>
+<summary>Click to expand Day 1 to Day 15 notes</summary>
 
 | Day | Topics Covered | Link |
 |:---|:---|:---|
@@ -42,6 +50,7 @@ A structured, comprehensive collection of Data Structures & Algorithms notes foc
 | **Day 12** | Largest Subarray with 0 Sum · Count Subarrays with Given XOR K · Merge Overlapping Subintervals | [Day12.md](Day12.md) |
 | **Day 13** | Merge Two Sorted Arrays without Extra Space (Two Pointers + Sort, Gap Method / Shell Sort, LeetCode 88 Reverse Fill) | [Day13.md](Day13.md) |
 | **Day 14** | Find Missing & Repeating Number · Count Inversions · Reverse Pairs · Maximum Product Subarray | [Day14.txt](Day14.txt) |
+| **Day 15** | Binary Search (Iterative & Recursive) — core concept, dry run, overflow-safe mid calculation | [Day15.txt](Day15.txt) |
 
 </details>
 
@@ -60,7 +69,7 @@ A structured, comprehensive collection of Data Structures & Algorithms notes foc
 ## 🛠️ Tech Stack
 
 - **Language:** Java
-- **Topics:** Arrays, Hashing, Two Pointers, Sliding Window, Prefix Sum, Dutch National Flag, Boyer-Moore Voting, Kadane's Algorithm, Merge Sort (Modified), Matrix Manipulation, Combinatorics, Math (Sum & Squares), Prefix-Suffix Product
+- **Topics:** Arrays, Binary Search, Hashing, Two Pointers, Sliding Window, Prefix Sum, Dutch National Flag, Boyer-Moore Voting, Kadane's Algorithm, Merge Sort (Modified), Matrix Manipulation, Combinatorics, Math (Sum & Squares), Prefix-Suffix Product, BS on Answer Space
 
 ---
 
