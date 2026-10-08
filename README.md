@@ -49,7 +49,7 @@ A structured, comprehensive collection of Data Structures & Algorithms notes foc
 | **Day 11** | 3 Sum · 4 Sum (Two Pointers & K-Sum Pattern) | [Day11.md](Day11.md) |
 | **Day 12** | Largest Subarray with 0 Sum · Count Subarrays with Given XOR K · Merge Overlapping Subintervals | [Day12.md](Day12.md) |
 | **Day 13** | Merge Two Sorted Arrays without Extra Space (Two Pointers + Sort, Gap Method / Shell Sort, LeetCode 88 Reverse Fill) | [Day13.md](Day13.md) |
-| **Day 14** | Find Missing & Repeating Number · Count Inversions · Reverse Pairs · Maximum Product Subarray | [Day14.md](Day14.md) |
+| **Day 14** | Find Missing & Repeating Number · Count Inversions · Reverse Pairs · Maximum Product Subarray | [Day14.txt](Day14.txt) |
 | **Day 15** | Binary Search Fundamentals (Iterative & Recursive) · Lower/Upper Bound · Search Insert · Floor & Ceil · First & Last Occurrence · Count Occurrences · Rotated Sorted Array Search (I & II) | [Day15.md](Day15.md) |
 
 </details>
