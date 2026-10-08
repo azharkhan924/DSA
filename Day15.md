@@ -1,4 +1,4 @@
-# Day 15 — Binary Search: Fundamentals, Bounds & Rotated Arrays
+# Day 15 — Binary Search: Fundamentals, Bounds & Range Queries
 
 ---
 
@@ -39,20 +39,8 @@
    - [Formula & Intuition](#formula--intuition)
    - [Java Implementation](#java-implementation-2)
    - [Complexity Analysis](#complexity-analysis-3)
-8. [Search in Rotated Sorted Array I — Unique Elements (LeetCode 33)](#8-search-in-rotated-sorted-array-i--unique-elements-leetcode-33)
-   - [The "At Least One Half is Sorted" Golden Rule](#the-at-least-one-half-is-sorted-golden-rule)
-   - [Decision Tree Flowchart](#decision-tree-flowchart)
-   - [Java Implementation](#java-implementation-3)
-   - [Step-by-Step Dry Run](#step-by-step-dry-run-1)
-   - [Complexity Analysis](#complexity-analysis-4)
-9. [Search in Rotated Sorted Array II — With Duplicates (LeetCode 81)](#9-search-in-rotated-sorted-array-ii--with-duplicates-leetcode-81)
-   - [The Ambiguity Trap: `nums[low] == nums[mid] == nums[high]`](#the-ambiguity-trap-numslow--numsmid--numshigh)
-   - [How to Break the Tie: Boundary Shrinking](#how-to-break-the-tie-boundary-shrinking)
-   - [Worst-Case $O(n)$ Degradation Analysis](#worst-case-on-degradation-analysis)
-   - [Java Implementation](#java-implementation-4)
-   - [Complexity Analysis](#complexity-analysis-5)
-10. [📊 Master Comparison & Interview Decision Matrix](#10--master-comparison--interview-decision-matrix)
-11. [⚠️ Common Traps & Edge Case Checklist](#11-️-common-traps--edge-case-checklist)
+8. [📊 Master Comparison & Interview Decision Matrix](#8--master-comparison--interview-decision-matrix)
+9. [⚠️ Common Traps & Edge Case Checklist](#9-️-common-traps--edge-case-checklist)
 
 ---
 
@@ -89,7 +77,7 @@ $$\text{mid} = \frac{\text{low} + \text{high}}{2}$$
 
 > [!CAUTION]
 > In Java, C++, and C, `int` is a 32-bit signed integer with maximum value $2^{31} - 1 = 2,147,483,647$.
-> If an array has a very large search space (e.g., searching within the answer space up to $2 \times 10^9$):
+> If an array has a very large search space:
 > $$\text{low} = 1.5 \times 10^9, \quad \text{high} = 2.0 \times 10^9$$
 > $$\text{low} + \text{high} = 3.5 \times 10^9 > 2.147 \times 10^9 \implies \text{\textbf{32-bit Integer Overflow!}}$$
 > The sum wraps around to a **negative number**, causing an immediate `ArrayIndexOutOfBoundsException`.
@@ -227,8 +215,8 @@ class Solution {
 #### Intuition & Algorithm
 - Maintain `ans = n` as the fallback if no element satisfies the condition.
 - At any `mid`:
-  - If `arr[mid] >= x`: This is a valid candidate! Save `ans = mid`. But can we find a smaller index to the left? Yes, so look left $\implies$ `high = mid - 1`.
-  - If `arr[mid] < x`: `arr[mid]` is strictly smaller than `x`, so it cannot be a candidate, nor can anything to its left. Look right $\implies$ `low = mid + 1`.
+  - If `arr[mid] >= x`: This is a valid candidate! Save `ans = mid`. Look left for a smaller index $\implies$ `high = mid - 1`.
+  - If `arr[mid] < x`: `arr[mid]` is strictly smaller than `x`. Look right $\implies$ `low = mid + 1`.
 
 #### Java Implementation
 ```java
@@ -724,204 +712,7 @@ class Solution {
 
 ---
 
-## 8. Search in Rotated Sorted Array I — Unique Elements (LeetCode 33)
-
-### The "At Least One Half is Sorted" Golden Rule
-
-An array originally sorted in ascending order is rotated at an unknown pivot. For example:
-`[0, 1, 2, 4, 5, 6, 7]` rotated at pivot index 4 becomes:
-`[4, 5, 6, 7, 0, 1, 2]`
-
-```
-Visual Profile of Rotated Sorted Array:
-Value
-  8 │         /
-  7 │       /
-  6 │     /
-  5 │   /               /
-  4 │ /               /
-  1 │               /
-  0 │             /
-    └───────────────
-      [4, 5, 6, 7]   [0, 1, 2]
-       Left Slope     Right Slope
-```
-
-> [!IMPORTANT]
-> **The Golden Observation:**
-> No matter where the pivot index is, when you pick `mid`, **at least one of the two halves (`[low..mid]` or `[mid..high]`) is GUARANTEED to be cleanly sorted!**
-
----
-
-### Decision Tree Flowchart
-
-```
-Is nums[low] <= nums[mid]?
-      │
-      ├── YES ──> [LEFT HALF IS SORTED]
-      │           Is target inside [nums[low] ... nums[mid])?
-      │           ├── YES ──> Search Left:  high = mid - 1
-      │           └── NO  ──> Search Right: low = mid + 1
-      │
-      └── NO  ──> [RIGHT HALF IS SORTED]
-                  Is target inside (nums[mid] ... nums[high]]?
-                  ├── YES ──> Search Right: low = mid + 1
-                  └── NO  ──> Search Left:  high = mid - 1
-```
-
----
-
-### Java Implementation
-```java
-class Solution {
-    public int search(int[] nums, int target) {
-        int low = 0;
-        int high = nums.length - 1;
-
-        while (low <= high) {
-            int mid = low + (high - low) / 2;
-
-            if (nums[mid] == target) {
-                return mid; // Target found
-            }
-
-            // Step 1: Check if left half is sorted
-            if (nums[low] <= nums[mid]) {
-                // Check if target lies within sorted left half
-                if (nums[low] <= target && target < nums[mid]) {
-                    high = mid - 1; // Search left
-                } else {
-                    low = mid + 1;  // Search right
-                }
-            }
-            // Step 2: Otherwise, right half MUST be sorted
-            else {
-                // Check if target lies within sorted right half
-                if (nums[mid] < target && target <= nums[high]) {
-                    low = mid + 1;  // Search right
-                } else {
-                    high = mid - 1; // Search left
-                }
-            }
-        }
-
-        return -1; // Target not found
-    }
-}
-```
-
----
-
-### Step-by-Step Dry Run
-
-`nums = [4, 5, 6, 7, 0, 1, 2]`, `target = 0`
-
-| Pass | `low` | `high` | `mid` | `nums[mid]` | Sorted Half Check | Range Check for `target = 0` | Action Taken |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **1** | `0 (4)` | `6 (2)` | `3` | `7` | `nums[0] <= nums[3]` ($4 \le 7$) $\implies$ Left sorted | $4 \le 0 < 7$ is **False** | Target is on right $\implies$ `low = 4` |
-| **2** | `4 (0)` | `6 (2)` | `5` | `1` | `nums[4] <= nums[5]` ($0 \le 1$) $\implies$ Left sorted | $0 \le 0 < 1$ is **True** | Target is on left $\implies$ `high = 4` |
-| **3** | `4 (0)` | `4 (0)` | `4` | `0` | `nums[4] == 0` | Target matched! | Return index `4` ✅ |
-
-### Complexity Analysis
-- **Time Complexity:** $O(\log n)$
-- **Space Complexity:** $O(1)$
-
----
-
-## 9. Search in Rotated Sorted Array II — With Duplicates (LeetCode 81)
-
-### The Ambiguity Trap: `nums[low] == nums[mid] == nums[high]`
-
-When duplicates are introduced, the fundamental check `nums[low] <= nums[mid]` can mislead us into assuming a half is sorted when it is not!
-
-> 🚨 **The Classic Ambiguity Example:**
-> Compare these two arrays for `target = 2`:
-> 1. `nums = [3, 1, 2, 3, 3, 3, 3]` $\implies$ `low=0 (3)`, `mid=3 (3)`, `high=6 (3)`
-> 2. `nums = [3, 3, 3, 3, 1, 2, 3]` $\implies$ `low=0 (3)`, `mid=3 (3)`, `high=6 (3)`
->
-> In both cases:
-> $$\text{nums}[low] == \text{nums}[mid] == \text{nums}[high] == 3$$
-> In Array 1, the target `2` is in the **left half**.
-> In Array 2, the target `2` is in the **right half**.
->
-> Because all three pointers see `3`, **it is mathematically impossible to know which half is sorted!**
-
----
-
-### How to Break the Tie: Boundary Shrinking
-Since `nums[mid] == 3 != target`, we already know that `mid` is not the answer.
-Furthermore, neither `nums[low]` nor `nums[high]` can be our answer (since they are also equal to `nums[mid]`).
-Therefore, we can safely shrink the search boundaries by one step from each side without losing any valid target:
-```java
-low++;
-high--;
-```
-
----
-
-### Worst-Case $O(n)$ Degradation Analysis
-
-> [!WARNING]
-> If all elements in the array are identical and `target` is different:
-> `nums = [3, 3, 3, 3, 3, 3, 3]`, `target = 2`
-> In every iteration, the boundary-shrinking branch triggers, shrinking `low` and `high` by 1.
-> The loop executes $n/2$ times before terminating.
-> - **Average Time Complexity:** $O(\log n)$
-> - **Worst-Case Time Complexity:** $O(n)$
-
----
-
-### Java Implementation
-```java
-class Solution {
-    public boolean search(int[] nums, int target) {
-        int low = 0;
-        int high = nums.length - 1;
-
-        while (low <= high) {
-            int mid = low + (high - low) / 2;
-
-            if (nums[mid] == target) {
-                return true;
-            }
-
-            // Ambiguity Resolution: Shrink boundaries when edges match mid
-            if (nums[low] == nums[mid] && nums[mid] == nums[high]) {
-                low++;
-                high--;
-                continue;
-            }
-
-            // Left half is sorted
-            if (nums[low] <= nums[mid]) {
-                if (nums[low] <= target && target < nums[mid]) {
-                    high = mid - 1; // Search left
-                } else {
-                    low = mid + 1;  // Search right
-                }
-            }
-            // Right half is sorted
-            else {
-                if (nums[mid] < target && target <= nums[high]) {
-                    low = mid + 1;  // Search right
-                } else {
-                    high = mid - 1; // Search left
-                }
-            }
-        }
-
-        return false;
-    }
-}
-```
-
-### Complexity Analysis
-- **Time Complexity:** Average $O(\log n)$, Worst Case $O(n)$
-- **Space Complexity:** $O(1)$
-
----
-
-## 10. 📊 Master Comparison & Interview Decision Matrix
+## 8. 📊 Master Comparison & Interview Decision Matrix
 
 | Problem | Array Type | Condition at `mid` | Target Range Update | Time Complexity | Space Complexity |
 | :--- | :--- | :--- | :--- | :---: | :---: |
@@ -932,20 +723,16 @@ class Solution {
 | **Floor & Ceil** | Sorted | Floor: `arr[mid] <= x`<br>Ceil: `arr[mid] >= x` | Floor: save, `low = mid + 1`<br>Ceil: save, `high = mid - 1` | $O(\log n)$ | $O(1)$ |
 | **First & Last** | Sorted with duplicates | First: match $\to$ go left<br>Last: match $\to$ go right | Standard binary search with directional bias | $O(\log n)$ | $O(1)$ |
 | **Count Occurrences** | Sorted with duplicates | — | $\text{Last} - \text{First} + 1$ | $O(\log n)$ | $O(1)$ |
-| **Rotated Search I** | Rotated, distinct | `nums[low] <= nums[mid]` | Identify sorted half, check boundaries | $O(\log n)$ | $O(1)$ |
-| **Rotated Search II** | Rotated with duplicates | `nums[low] == nums[mid] == nums[high]` | Ambiguity: `low++, high--`<br>Else: same as Rotated I | Avg: $O(\log n)$<br>Worst: $O(n)$ | $O(1)$ |
 
 ---
 
-## 11. ⚠️ Common Traps & Edge Case Checklist
+## 9. ⚠️ Common Traps & Edge Case Checklist
 
 1. **Integer Overflow:** Always write `mid = low + (high - low) / 2`. Never write `(low + high) / 2`.
 2. **Loop Condition (`<=` vs `<`):**
    - Use `while (low <= high)` when searching for a value and updating `low = mid + 1`, `high = mid - 1`. The `<=` guarantees that a search space of size 1 (`low == high`) is checked before terminating.
 3. **Missing Validation on Bounds:**
    - Lower Bound returns index `n` if all elements are smaller than `x`. Always verify `lb < n && nums[lb] == x` before reading `nums[lb]` when checking for existence.
-4. **Duplicate Ambiguity in Rotated Arrays:**
-   - Always place the `if (nums[low] == nums[mid] && nums[mid] == nums[high]) { low++; high--; continue; }` check **immediately after** checking `if (nums[mid] == target)` and **before** checking `nums[low] <= nums[mid]`.
-5. **Empty or Single-Element Arrays:**
-   - Handle $n = 0$ (instantly returns `-1` or `false` or `[-1, -1]`).
+4. **Empty or Single-Element Arrays:**
+   - Handle $n = 0$ (instantly returns `-1` or `[-1, -1]`).
    - For $n = 1$, `low = 0, high = 0`, `mid = 0`: correctly checks the single element on iteration 1.
