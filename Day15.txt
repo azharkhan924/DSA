@@ -1,46 +1,52 @@
 Binary search
 
-Dictionary is an example  where all the words are in alphabetical order a,b,c,d.....z
-to find word raj
-look for words with r then again in alphabetical order move forward
+Dictionary is an example where all the words are in alphabetical order a, b, c, d ... z
+To find word "raj":
+Look for words with 'r', then again in alphabetical order move forward.
 
 Pre-requisite: Array must be SORTED
 
-nums=[3,4,6,7,8,12,16,17] n=18
-      low              high
-everything between low and high is search Space
-mid=(low+high)/2
-if nums[mid]>target high=mid-1
-if nums[mid]<target low=mid+1
-if nums[mid]==target return mid;
-target=6
+nums = [3, 4, 6, 7, 8, 12, 16, 17], n = 8
+        low                      high
+Everything between low and high is search Space.
+mid = low + (high - low) / 2  // avoids integer overflow compared to (low + high) / 2
+
+if nums[mid] > target: high = mid - 1
+if nums[mid] < target: low = mid + 1
+if nums[mid] == target: return mid
 
 Dry Run:
-nums=[3,4,6,7,9,12,16,17]
-suppose our target is 13
+nums = [3, 4, 6, 7, 8, 12, 16, 17]
+Suppose our target is 13:
 
-mid=(0+7)/2=3
-nums[3]=7
+Step 1:
+low = 0, high = 7
+mid = 0 + (7 - 0) / 2 = 3
+nums[3] = 7
 
-nums[3]<target low=mid+1
-low=4
-mid=(4+7)/2=5
+nums[3] < target (7 < 13) -> target lies in right half
+low = mid + 1 = 4
 
-nums[5]=12
+Step 2:
+low = 4, high = 7
+mid = 4 + (7 - 4) / 2 = 5
+nums[5] = 12
 
-12<target
-low=mid+1
-low=6
-mid=(6+7)/2=6
-nums[6]=16
+nums[5] < target (12 < 13) -> target lies in right half
+low = mid + 1 = 6
 
-16>target
-high=mid-1
-high=6-1=5
+Step 3:
+low = 6, high = 7
+mid = 6 + (7 - 6) / 2 = 6
+nums[6] = 16
 
-high=5. low=6
+nums[6] > target (16 > 13) -> target lies in left half
+high = mid - 1 = 5
 
-low>high. loop breaksss
+Step 4:
+low = 6, high = 5
+low > high -> Search space exhausted, loop breaks!
+Return -1 (target not found)
 
 
 Code 1: Binary Search using loop (Iterative)
@@ -93,3 +99,643 @@ class Solution {
 
 Time Complexity : O(log n)
 Space Complexity : O(log n) - recursive call stack
+
+
+
+
+
+Lower Bound -> Smallest index such that arr[index] >= x
+If no such element exists, return n (size of array).
+
+arr[] = {3, 5, 8, 15, 19}
+         0  1  2   3   4
+
+x = 8   -> lb = 2   (arr[2] = 8 >= 8)
+x = 9   -> lb = 3   (arr[3] = 15 >= 9)
+x = 16  -> lb = 4   (arr[4] = 19 >= 16)
+x = 20  -> lb = 5   (hypothetical index n = 5, no element >= 20)
+
+Approach 1: Using linear traversal
+
+class Solution {
+    public int lowerBound(int[] arr, int x) {
+        int n = arr.length;
+        for (int i = 0; i < n; i++) {
+            if (arr[i] >= x) {
+                return i;
+            }
+        }
+        return n;
+    }
+}
+
+Time Complexity : O(n)
+Space Complexity : O(1)
+
+
+Approach 2: Using Binary Search
+
+Suppose:
+Case 1: x = 1
+arr[] = {1, 2, 3, 3, 7, 8, 9, 9, 9, 11}
+n = 10, low = 0, high = 9, ans = 10
+
+Pass 1:
+mid = 0 + (9 - 0) / 2 = 4
+arr[4] = 7
+arr[4] >= x (7 >= 1) -> candidate found!
+ans = mid = 4
+high = mid - 1 = 3
+
+Pass 2:
+low = 0, high = 3
+mid = 0 + (3 - 0) / 2 = 1
+arr[1] = 2
+arr[1] >= x (2 >= 1) -> smaller index found!
+ans = mid = 1
+high = mid - 1 = 0
+
+Pass 3:
+low = 0, high = 0
+mid = 0 + (0 - 0) / 2 = 0
+arr[0] = 1
+arr[0] >= x (1 >= 1) -> smallest index found!
+ans = mid = 0
+high = mid - 1 = -1
+
+low > high (0 > -1) -> Loop ends.
+Output: ans = 0
+
+Case 2: x = 9
+arr[] = {1, 2, 3, 3, 7, 8, 9, 9, 9, 11}
+low = 0, high = 9, ans = 10
+mid = 4 -> arr[4] = 7 < 9 -> low = mid + 1 = 5
+mid = 7 -> arr[7] = 9 >= 9 -> ans = 7, high = 6
+mid = 5 -> arr[5] = 8 < 9 -> low = 6
+mid = 6 -> arr[6] = 9 >= 9 -> ans = 6, high = 5
+low > high -> Loop ends.
+Output: ans = 6 (first occurrence of 9)
+
+
+Code:
+
+class Solution {
+    public int lowerBound(int[] arr, int x) {
+        int n = arr.length;
+        int low = 0, high = n - 1;
+        int ans = n;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+
+            if (arr[mid] >= x) {
+                ans = mid;
+                high = mid - 1; // look for smaller index on the left
+            } else {
+                low = mid + 1;  // element is smaller, look on right
+            }
+        }
+        return ans;
+    }
+}
+
+Time Complexity : O(log n)
+Space Complexity : O(1)
+
+C++ equivalent:
+lb = lower_bound(arr.begin(), arr.end(), x) - arr.begin();
+
+
+
+
+
+Upper Bound -> Smallest index such that arr[index] > x
+If no such element exists, return n.
+
+arr[] = {2, 3, 6, 7, 8, 8, 11, 11, 11, 12}
+n = 10
+
+Comparison:
+Lower Bound (arr[mid] >= x):          Upper Bound (arr[mid] > x):
+if (arr[mid] >= x) {                   if (arr[mid] > x) {
+    ans = mid;                             ans = mid;
+    high = mid - 1;                        high = mid - 1;
+} else {                               } else {
+    low = mid + 1;                         low = mid + 1;
+}                                      }
+
+Approach 1: Linear Traversal
+
+class Solution {
+    public int upperBound(int[] arr, int x) {
+        int n = arr.length;
+        for (int i = 0; i < n; i++) {
+            if (arr[i] > x) {
+                return i;
+            }
+        }
+        return n;
+    }
+}
+
+Time Complexity : O(n)
+Space Complexity : O(1)
+
+
+Approach 2: Binary Search
+
+class Solution {
+    public int upperBound(int[] arr, int x) {
+        int n = arr.length;
+        int low = 0, high = n - 1;
+        int ans = n;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+
+            if (arr[mid] > x) {
+                ans = mid;
+                high = mid - 1; // look for smaller index on left
+            } else {
+                low = mid + 1;  // look on right
+            }
+        }
+        return ans;
+    }
+}
+
+Time Complexity : O(log n)
+Space Complexity : O(1)
+
+C++ equivalent:
+ub = upper_bound(arr.begin(), arr.end(), x) - arr.begin();
+
+
+
+
+
+Search Insert Position (LeetCode 35)
+
+Given a sorted array of distinct integers and a target value, return the index if the target is found.
+If not, return the index where it would be if it were inserted in order.
+
+Example:
+arr = [1, 3, 5, 6], target = 5 -> Output: 2
+arr = [1, 3, 5, 6], target = 2 -> Output: 1
+arr = [1, 3, 5, 6], target = 7 -> Output: 4
+
+Key Insight:
+This problem is EXACTLY identical to finding the LOWER BOUND!
+We need the smallest index where arr[index] >= target.
+
+Approach 1: Linear Search
+Traverse from 0 to n-1, return first index where arr[i] >= target. If none, return n.
+Time: O(n), Space: O(1)
+
+Approach 2: Find Lower Bound using Binary Search
+
+class Solution {
+    public int searchInsert(int[] nums, int target) {
+        int low = 0, high = nums.length - 1;
+        int ans = nums.length;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+
+            if (nums[mid] >= target) {
+                ans = mid;
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return ans;
+    }
+}
+
+Time Complexity : O(log n)
+Space Complexity : O(1)
+
+
+
+
+
+Floor and Ceil in Sorted Array
+
+Given a sorted array arr and a number x:
+Floor -> Largest number in array <= x (return -1 if none)
+Ceil  -> Smallest number in array >= x (return -1 if none)
+
+Example:
+arr[] = {10, 20, 30, 40, 50}, x = 25
+Floor = 20, Ceil = 30
+
+Ceil is obtained using Lower Bound (value at lower bound index).
+Floor is obtained with a small modification: if arr[mid] <= x, record candidate and search right (low = mid + 1).
+
+Code:
+
+class Solution {
+    public int[] getFloorAndCeil(int[] arr, int x) {
+        int floor = findFloor(arr, x);
+        int ceil = findCeil(arr, x);
+        return new int[]{floor, ceil};
+    }
+
+    private int findFloor(int[] arr, int x) {
+        int low = 0, high = arr.length - 1;
+        int ans = -1;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+
+            if (arr[mid] <= x) {
+                ans = arr[mid];
+                low = mid + 1; // look for larger candidate on the right
+            } else {
+                high = mid - 1;
+            }
+        }
+        return ans;
+    }
+
+    private int findCeil(int[] arr, int x) {
+        int low = 0, high = arr.length - 1;
+        int ans = -1;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+
+            if (arr[mid] >= x) {
+                ans = arr[mid];
+                high = mid - 1; // look for smaller candidate on the left
+            } else {
+                low = mid + 1;
+            }
+        }
+        return ans;
+    }
+}
+
+Time Complexity : O(log n)
+Space Complexity : O(1)
+
+
+
+
+
+First and Last Occurrences of x (LeetCode 34)
+
+Given a sorted array of integers nums and an integer target, find the starting and ending position of a given target value.
+If target is not found in the array, return [-1, -1].
+
+arr[] = {2, 4, 6, 7, 7, 11, 13}, n = 7
+x = 7   -> ans = {3, 4}
+x = 10  -> ans = {-1, -1}
+x = 11  -> ans = {5, 5}
+
+Approach 1: Linear traversal
+Scan array from left to right to find first index, scan from right to left to find last index.
+Time: O(n), Space: O(1)
+
+
+Approach 2: Using Lower Bound and Upper Bound
+Find lower bound of x -> lb
+Find upper bound of x -> ub
+
+Potential answer: ans = {lb, ub - 1}
+
+Problem / Edge Cases:
+Suppose x = 10 (not present in array):
+lb(10) = 6 (arr[6] = 13 >= 10)
+But 10 is not in the array, so answer must be {-1, -1}!
+Also if x is greater than all elements, lb(x) = n.
+
+Condition to check:
+if (lb == n || arr[lb] != x) return new int[]{-1, -1};
+
+Code:
+
+class Solution {
+    public int[] searchRange(int[] nums, int target) {
+        int n = nums.length;
+        int lb = lowerBound(nums, target);
+
+        // If target is not present
+        if (lb == n || nums[lb] != target) {
+            return new int[]{-1, -1};
+        }
+
+        int ub = upperBound(nums, target);
+        return new int[]{lb, ub - 1};
+    }
+
+    private int lowerBound(int[] arr, int x) {
+        int low = 0, high = arr.length - 1;
+        int ans = arr.length;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (arr[mid] >= x) {
+                ans = mid;
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return ans;
+    }
+
+    private int upperBound(int[] arr, int x) {
+        int low = 0, high = arr.length - 1;
+        int ans = arr.length;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (arr[mid] > x) {
+                ans = mid;
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return ans;
+    }
+}
+
+Time Complexity : 2 * O(log n) = O(log n)
+Space Complexity : O(1)
+
+
+Approach 3: Direct Binary Search (Separate First & Last methods)
+
+Maintain first and last variables.
+- For first occurrence: when nums[mid] == target, record ans = mid and search in LEFT half (high = mid - 1).
+- For last occurrence: when nums[mid] == target, record ans = mid and search in RIGHT half (low = mid + 1).
+
+Code:
+
+class Solution {
+    public int[] searchRange(int[] nums, int target) {
+        int first = findFirst(nums, target);
+        if (first == -1) return new int[]{-1, -1};
+        int last = findLast(nums, target);
+        return new int[]{first, last};
+    }
+
+    private int findFirst(int[] nums, int target) {
+        int low = 0, high = nums.length - 1;
+        int ans = -1;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+
+            if (nums[mid] == target) {
+                ans = mid;
+                high = mid - 1; // keep looking left
+            } else if (nums[mid] < target) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return ans;
+    }
+
+    private int findLast(int[] nums, int target) {
+        int low = 0, high = nums.length - 1;
+        int ans = -1;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+
+            if (nums[mid] == target) {
+                ans = mid;
+                low = mid + 1;  // keep looking right
+            } else if (nums[mid] < target) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return ans;
+    }
+}
+
+Time Complexity : 2 * O(log n) = O(log n)
+Space Complexity : O(1)
+
+
+
+
+
+Number of Occurrences (Count Occurrences in Sorted Array)
+
+Given a sorted array arr and an integer x, return the number of times x appears in the array.
+
+Example:
+arr = [1, 1, 2, 2, 2, 2, 3], x = 2 -> Output: 4
+
+Key Formula:
+count = last occurrence - first occurrence + 1
+
+If element is not found (first == -1):
+count = 0
+
+Code:
+
+class Solution {
+    public int count(int[] arr, int n, int x) {
+        int first = findFirst(arr, x);
+        if (first == -1) return 0;
+        int last = findLast(arr, x);
+        return last - first + 1;
+    }
+
+    private int findFirst(int[] arr, int x) {
+        int low = 0, high = arr.length - 1;
+        int ans = -1;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (arr[mid] == x) {
+                ans = mid;
+                high = mid - 1;
+            } else if (arr[mid] < x) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return ans;
+    }
+
+    private int findLast(int[] arr, int x) {
+        int low = 0, high = arr.length - 1;
+        int ans = -1;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (arr[mid] == x) {
+                ans = mid;
+                low = mid + 1;
+            } else if (arr[mid] < x) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return ans;
+    }
+}
+
+Time Complexity : O(log n)
+Space Complexity : O(1)
+
+
+
+
+
+Search in Rotated Sorted Array - I (Unique Elements - LeetCode 33)
+
+Given an array sorted in ascending order with distinct values, which has been rotated at some unknown pivot index.
+Given target, return index if found, else -1.
+
+Example:
+nums = [4, 5, 6, 7, 0, 1, 2], target = 0 -> Output: 4
+nums = [4, 5, 6, 7, 0, 1, 2], target = 3 -> Output: -1
+
+Approach 1: Linear Search
+Time: O(n), Space: O(1)
+
+Approach 2: Modified Binary Search
+Key Observation:
+Even though the array is rotated, AT LEAST ONE HALF will ALWAYS BE SORTED!
+
+How to identify the sorted half:
+1. Compare nums[low] with nums[mid]:
+   If nums[low] <= nums[mid] -> LEFT HALF IS SORTED!
+   - Check if target lies within the left half range:
+     if (nums[low] <= target && target < nums[mid]):
+         target is in left half -> high = mid - 1
+     else:
+         target is in right half -> low = mid + 1
+
+2. If left half is not sorted, then RIGHT HALF MUST BE SORTED!
+   nums[mid] <= nums[high] -> RIGHT HALF IS SORTED!
+   - Check if target lies within the right half range:
+     if (nums[mid] < target && target <= nums[high]):
+         target is in right half -> low = mid + 1
+     else:
+         target is in left half -> high = mid - 1
+
+Code:
+
+class Solution {
+    public int search(int[] nums, int target) {
+        int low = 0, high = nums.length - 1;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+
+            if (nums[mid] == target) {
+                return mid;
+            }
+
+            // Check if left half is sorted
+            if (nums[low] <= nums[mid]) {
+                if (nums[low] <= target && target < nums[mid]) {
+                    high = mid - 1; // target is in left sorted half
+                } else {
+                    low = mid + 1;  // target is in right half
+                }
+            }
+            // Otherwise, right half must be sorted
+            else {
+                if (nums[mid] < target && target <= nums[high]) {
+                    low = mid + 1;  // target is in right sorted half
+                } else {
+                    high = mid - 1; // target is in left half
+                }
+            }
+        }
+        return -1;
+    }
+}
+
+Time Complexity : O(log n)
+Space Complexity : O(1)
+
+
+
+
+
+Search in Rotated Sorted Array - II (With Duplicates - LeetCode 81)
+
+Given the array nums after the rotation and an integer target, return true if target is in nums, or false if it is not.
+Array may contain duplicate elements.
+
+Example:
+nums = [2, 5, 6, 0, 0, 1, 2], target = 0 -> Output: true
+nums = [2, 5, 6, 0, 0, 1, 2], target = 3 -> Output: false
+
+The Ambiguity Problem with duplicates:
+Suppose nums = [3, 1, 2, 3, 3, 3, 3] and target = 2:
+low = 0 (val = 3), mid = 3 (val = 3), high = 6 (val = 3)
+Here nums[low] == nums[mid] == nums[high]!
+We CANNOT tell whether the left half or right half is sorted!
+
+Example 2:
+nums = [3, 3, 3, 3, 1, 2, 3] and target = 2:
+Again nums[low] == nums[mid] == nums[high] == 3!
+Here the sorted part is on the left, but target is on the right.
+
+Resolution:
+When nums[low] == nums[mid] == nums[high], we cannot eliminate a half safely.
+However, since nums[mid] != target (already checked), we know neither nums[low] nor nums[high] is our target.
+Hence, simply trim the boundaries:
+low++;
+high--;
+
+Code:
+
+class Solution {
+    public boolean search(int[] nums, int target) {
+        int low = 0, high = nums.length - 1;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+
+            if (nums[mid] == target) {
+                return true;
+            }
+
+            // Edge case: cannot identify sorted half due to duplicates
+            if (nums[low] == nums[mid] && nums[mid] == nums[high]) {
+                low++;
+                high--;
+                continue;
+            }
+
+            // Check if left half is sorted
+            if (nums[low] <= nums[mid]) {
+                if (nums[low] <= target && target < nums[mid]) {
+                    high = mid - 1;
+                } else {
+                    low = mid + 1;
+                }
+            }
+            // Otherwise, right half is sorted
+            else {
+                if (nums[mid] < target && target <= nums[high]) {
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+        }
+        return false;
+    }
+}
+
+Time Complexity :
+Average Case: O(log n)
+Worst Case: O(n/2) ≈ O(n) (when all elements are identical, e.g. [3,3,3,3,3] and target is 2)
+
+Space Complexity : O(1)
