@@ -25,7 +25,7 @@ A structured, comprehensive collection of Data Structures & Algorithms notes foc
 
 | Category | Problems Covered | Status | Guide Link |
 |:---|:---|:---:|:---:|
-| 🔍 **Binary Search** | 17 Problems (Standard BS, Lower/Upper Bound, Search Insert, Floor/Ceil, First/Last Occurrence, Count Occurrences, Rotated Array Search, Find Min, Rotations, Single Element, Peak Element, Sqrt, Nth Root, Koko Eating Bananas) | 17 / 17 ✅ | [Binary_Search.md](Binary%20Search/Binary_Search.md) |
+| 🔍 **Binary Search** | 8 Problems (Standard BS Iterative & Recursive, Lower/Upper Bound, Search Insert, Floor/Ceil, First/Last Occurrence, Count Occurrences) | 8 / 8 ✅ | [Binary_Search.md](Binary%20Search/Binary_Search.md) |
 
 ---
 
